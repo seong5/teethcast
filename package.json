@@ -16,9 +16,12 @@
   "packageManager": "pnpm@10.11.0",
   "dependencies": {
     "@tanstack/react-query": "^5.90.20",
+    "axios": "^1.13.3",
+    "dayjs": "^1.11.19",
     "next": "^16.1.5",
     "react": "^19.2.4",
-    "react-dom": "^19.2.4"
+    "react-dom": "^19.2.4",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@types/node": "^25.0.10",
