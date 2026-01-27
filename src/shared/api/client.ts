@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { type AxiosError } from 'axios';
 
 export const apiClient = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || '',
@@ -21,7 +21,7 @@ apiClient.interceptors.response.use(
   (response) => {
     return response;
   },
-  (error) => {
+  (error: AxiosError) => {
     if (error.response) {
       console.error('API Error:', error.response.status, error.response.data);
     } else if (error.request) {
