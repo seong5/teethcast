@@ -11,7 +11,7 @@ describe('Button', () => {
   it('기본적으로 primary variant가 적용된다', () => {
     render(<Button>Primary</Button>);
     const button = screen.getByRole('button');
-    expect(button).toHaveClass('bg-indigo-600');
+    expect(button).toHaveClass('bg-[#10a6c1]');
   });
 
   it('secondary variant가 적용된다', () => {
@@ -23,7 +23,7 @@ describe('Button', () => {
   it('size 클래스가 올바르게 적용된다', () => {
     render(<Button size="lg">Large</Button>);
     const button = screen.getByRole('button');
-    expect(button).toHaveClass('px-10', 'py-3', 'text-base');
+    expect(button).toHaveClass('px-8', 'py-4', 'text-lg');
   });
 
   it('disabled prop이 true일 때 비활성화된다', () => {

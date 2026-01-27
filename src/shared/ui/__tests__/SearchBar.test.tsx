@@ -7,7 +7,7 @@ describe('SearchBar', () => {
     const handleChange = jest.fn();
     render(<SearchBar value="" onChange={handleChange} />);
     expect(screen.getByRole('search')).toBeInTheDocument();
-    expect(screen.getByRole('textbox')).toBeInTheDocument();
+    expect(screen.getByRole('searchbox')).toBeInTheDocument();
   });
 
   it('placeholder가 올바르게 표시된다', () => {
@@ -25,7 +25,7 @@ describe('SearchBar', () => {
   it('입력값이 올바르게 표시된다', () => {
     const handleChange = jest.fn();
     render(<SearchBar value="서울" onChange={handleChange} />);
-    const input = screen.getByRole('textbox') as HTMLInputElement;
+    const input = screen.getByRole('searchbox') as HTMLInputElement;
     expect(input.value).toBe('서울');
   });
 
@@ -34,7 +34,7 @@ describe('SearchBar', () => {
     const user = userEvent.setup();
     render(<SearchBar value="" onChange={handleChange} />);
     
-    const input = screen.getByRole('textbox');
+    const input = screen.getByRole('searchbox');
     await user.type(input, '서울');
     
     expect(handleChange).toHaveBeenCalledTimes(2); // '서', '울' 각각 호출
@@ -46,7 +46,7 @@ describe('SearchBar', () => {
     const user = userEvent.setup();
     render(<SearchBar value="서울" onChange={handleChange} onSearchClick={handleSearch} />);
     
-    const input = screen.getByRole('textbox');
+    const input = screen.getByRole('searchbox');
     await user.type(input, '{Enter}');
     
     expect(handleSearch).toHaveBeenCalledTimes(1);
@@ -84,6 +84,6 @@ describe('SearchBar', () => {
     render(<SearchBar value="" onChange={handleChange} placeholder="지역 검색" />);
     
     expect(screen.getByRole('search')).toHaveAttribute('aria-label', '검색');
-    expect(screen.getByRole('textbox')).toHaveAttribute('aria-label', '지역 검색');
+    expect(screen.getByRole('searchbox')).toHaveAttribute('aria-label', '지역 검색');
   });
 });
