@@ -26,17 +26,17 @@ export default function Button({
 
   const variantStyles = {
     primary:
-      'bg-indigo-600 text-white hover:bg-indigo-700 disabled:bg-gray-300 shadow-lg shadow-indigo-100 rounded-xl',
-    secondary: 'bg-gray-900 text-white hover:opacity-90 disabled:bg-gray-300 shadow-lg rounded-2xl',
+      'bg-[#10a6c1] text-white hover:bg-[#0d8fa8] disabled:bg-gray-300 rounded-xl',
+    secondary: 'bg-gray-900 text-white hover:opacity-90 disabled:bg-gray-300 rounded-2xl',
     outline:
       'bg-white border border-gray-200 text-gray-900 hover:bg-gray-50 disabled:bg-gray-100 rounded-xl',
     ghost: 'text-gray-400 hover:text-gray-900 disabled:opacity-0',
   };
 
   const sizeStyles = {
-    sm: 'px-4 py-2 text-sm',
-    md: 'px-5 py-2.5 text-sm',
-    lg: 'px-10 py-3 text-base',
+    sm: 'px-5 py-2.5 text-sm min-h-[40px]',
+    md: 'px-6 py-3 text-base min-h-[48px]',
+    lg: 'px-8 py-4 text-lg min-h-[56px]',
   };
 
   const iconElement = icon && !isLoading && icon;
