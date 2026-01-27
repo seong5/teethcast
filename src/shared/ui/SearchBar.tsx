@@ -17,7 +17,7 @@ export default function SearchBar({
 }: SearchBarProps) {
   return (
     <div
-      className={`flex flex-col items-center gap-3 rounded-2xl border border-slate-100 bg-white p-4 shadow-xl shadow-slate-200/20 sm:gap-4 sm:rounded-3xl sm:p-6 md:flex-row ${className}`}
+      className={`flex flex-col items-center gap-3 rounded-2xl border border-slate-100 bg-white p-4 shadow-xl shadow-slate-200/20 dark:border-gray-700 dark:bg-gray-800 dark:shadow-gray-900/20 sm:gap-4 sm:rounded-3xl sm:p-6 md:flex-row ${className}`}
       role="search"
       aria-label="검색"
     >
@@ -37,7 +37,7 @@ export default function SearchBar({
             }
           }}
           aria-label={placeholder || '검색어 입력'}
-          className="w-full rounded-xl border-none bg-slate-50 py-3 px-3 text-sm font-medium text-black outline-none transition-all focus:ring-4 focus:ring-[#10a6c1]/20 focus:border focus:border-[#10a6c1] sm:rounded-2xl sm:py-3.5 sm:px-4"
+          className="w-full rounded-xl border-none bg-slate-50 py-3 px-3 text-sm font-medium text-black outline-none transition-all focus:ring-4 focus:ring-[#10a6c1]/20 focus:border focus:border-[#10a6c1] dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 sm:rounded-2xl sm:py-3.5 sm:px-4"
         />
       </div>
       {onSearchClick && (
