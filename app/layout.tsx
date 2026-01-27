@@ -1,0 +1,19 @@
+import type { Metadata } from "next";
+import "./globals.css";
+
+export const metadata: Metadata = {
+  title: "Teethcast - 우리나라 날씨 정보",
+  description: "우리나라 각 지역에 대한 날씨 정보를 확인할 수 있는 서비스입니다.",
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="ko">
+      <body>{children}</body>
+    </html>
+  );
+}
