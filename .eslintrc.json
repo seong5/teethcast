@@ -33,5 +33,25 @@
     "react": {
       "version": "detect"
     }
-  }
+  },
+  "overrides": [
+    {
+      "files": ["jest.config.ts", "jest.setup.ts", "next.config.ts"],
+      "parserOptions": {
+        "sourceType": "module"
+      },
+      "env": {
+        "node": true
+      }
+    },
+    {
+      "files": ["**/__tests__/**/*", "**/*.test.ts", "**/*.test.tsx", "**/*.spec.ts", "**/*.spec.tsx"],
+      "rules": {
+        "@typescript-eslint/no-unsafe-call": "off",
+        "@typescript-eslint/no-unsafe-assignment": "off",
+        "@typescript-eslint/no-unsafe-member-access": "off",
+        "@typescript-eslint/no-unsafe-return": "off"
+      }
+    }
+  ]
 }
