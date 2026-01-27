@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { SearchBar } from '@/shared/ui';
+import WeatherIcon, { WindIcon, HumidityIcon } from '@/shared/ui/WeatherIcon';
 import { useGeolocation, useReverseGeocoding, useWeather } from '@/shared/lib';
 import type { WeatherData } from '@/shared/lib/useWeather';
 
@@ -72,38 +73,59 @@ export function HomePage() {
               const weatherData = weather as WeatherData;
               return (
                 <div className="w-full bg-gradient-to-br from-blue-50 to-blue-100 dark:from-gray-800 dark:to-gray-900 rounded-2xl p-6 shadow-lg">
-                  <div className="text-center">
-                    <div className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
-                      {weatherData.temperature}°C
+                  <div className="flex flex-col items-center gap-4 text-center">
+                    <div className="flex items-center gap-3">
+                      <WeatherIcon
+                        sky={weatherData.sky}
+                        precipitation={weatherData.precipitation}
+                        size={40}
+                        aria-label={`${weatherData.sky} ${weatherData.precipitation !== '없음' ? weatherData.precipitation : ''}`.trim()}
+                      />
+                      <div className="text-4xl font-bold text-gray-900 dark:text-white">
+                        {weatherData.temperature}°C
+                      </div>
                     </div>
-                    <div className="text-lg text-gray-700 dark:text-gray-300 mb-4">
-                      {weatherData.sky} {weatherData.precipitation !== '없음' ? `· ${weatherData.precipitation}` : ''}
+                    <div className="text-lg text-gray-700 dark:text-gray-300">
+                      {weatherData.sky}{' '}
+                      {weatherData.precipitation !== '없음' ? `· ${weatherData.precipitation}` : ''}
                     </div>
                     
-                    <div className="grid grid-cols-2 gap-4 mt-4 text-sm">
+                    <div className="grid grid-cols-2 gap-4 mt-2 text-sm w-full">
                       <div className="bg-white/50 dark:bg-gray-700/50 rounded-lg p-3">
-                        <div className="text-gray-600 dark:text-gray-400">최저</div>
+                        <div className="text-gray-600 dark:text-gray-400">최저기온</div>
                         <div className="text-lg font-semibold text-blue-600 dark:text-blue-400">
                           {weatherData.minTemp}°C
                         </div>
                       </div>
                       <div className="bg-white/50 dark:bg-gray-700/50 rounded-lg p-3">
-                        <div className="text-gray-600 dark:text-gray-400">최고</div>
+                        <div className="text-gray-600 dark:text-gray-400">최고기온</div>
                         <div className="text-lg font-semibold text-red-600 dark:text-red-400">
                           {weatherData.maxTemp}°C
                         </div>
                       </div>
-                      <div className="bg-white/50 dark:bg-gray-700/50 rounded-lg p-3">
-                        <div className="text-gray-600 dark:text-gray-400">습도</div>
-                        <div className="text-lg font-semibold text-gray-900 dark:text-white">
-                          {weatherData.humidity}%
+                      <div className="bg-white/50 dark:bg-gray-700/50 rounded-lg p-3 flex items-center justify-between">
+                        <div>
+                          <div className="text-gray-600 dark:text-gray-400">습도</div>
+                          <div className="text-lg font-semibold text-gray-900 dark:text-white">
+                            {weatherData.humidity}%
+                          </div>
                         </div>
+                        <HumidityIcon
+                          size={24}
+                          aria-label={`습도 ${weatherData.humidity}퍼센트`}
+                        />
                       </div>
-                      <div className="bg-white/50 dark:bg-gray-700/50 rounded-lg p-3">
-                        <div className="text-gray-600 dark:text-gray-400">풍속</div>
-                        <div className="text-lg font-semibold text-gray-900 dark:text-white">
-                          {weatherData.windSpeed}m/s
+                      <div className="bg-white/50 dark:bg-gray-700/50 rounded-lg p-3 flex items-center justify-between">
+                        <div>
+                          <div className="text-gray-600 dark:text-gray-400">풍속</div>
+                          <div className="text-lg font-semibold text-gray-900 dark:text-white">
+                            {weatherData.windSpeed}m/s
+                          </div>
                         </div>
+                        <WindIcon
+                          size={24}
+                          aria-label={`풍속 ${weatherData.windSpeed}미터`}
+                        />
                       </div>
                     </div>
                   </div>
@@ -132,11 +154,16 @@ export function HomePage() {
                             <div className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                               {hourly.time}
                             </div>
-                            <div className="text-lg font-bold text-gray-900 dark:text-white mb-1">
-                              {hourly.temperature}°C
-                            </div>
-                            <div className="text-xs text-gray-600 dark:text-gray-400 mb-1">
-                              {hourly.sky}
+                            <div className="flex flex-col items-center gap-1 mb-1">
+                              <WeatherIcon
+                                sky={hourly.sky}
+                                precipitation={hourly.precipitation}
+                                size={24}
+                                aria-label={`${hourly.sky} ${hourly.precipitation !== '없음' ? hourly.precipitation : ''}`.trim()}
+                              />
+                              <div className="text-lg font-bold text-gray-900 dark:text-white">
+                                {hourly.temperature}°C
+                              </div>
                             </div>
                             {hourly.precipitation !== '없음' && (
                               <div className="text-xs text-blue-600 dark:text-blue-400">
