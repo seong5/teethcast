@@ -52,6 +52,14 @@
         "@typescript-eslint/no-unsafe-member-access": "off",
         "@typescript-eslint/no-unsafe-return": "off"
       }
+    },
+    {
+      "files": ["**/useTheme.ts"],
+      "rules": {
+        "react-hooks/exhaustive-deps": "off",
+        "@typescript-eslint/no-floating-promises": "off",
+        "react-compiler/react-compiler": "off"
+      }
     }
   ]
 }

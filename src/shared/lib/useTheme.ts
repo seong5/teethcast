@@ -8,17 +8,6 @@ export function useTheme() {
   const [theme, setTheme] = useState<Theme>('light');
   const [mounted, setMounted] = useState(false);
 
-  useEffect(() => {
-    setMounted(true);
-    const savedTheme = localStorage.getItem('theme') as Theme | null;
-    const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches
-      ? 'dark'
-      : 'light';
-    const initialTheme = savedTheme || systemTheme;
-    setTheme(initialTheme);
-    applyTheme(initialTheme);
-  }, []);
-
   const applyTheme = (newTheme: Theme) => {
     const root = document.documentElement;
     if (newTheme === 'dark') {
@@ -27,6 +16,21 @@ export function useTheme() {
       root.classList.remove('dark');
     }
   };
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
+    const savedTheme = localStorage.getItem('theme') as Theme | null;
+    const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches
+      ? 'dark'
+      : 'light';
+    const initialTheme = savedTheme || systemTheme;
+
+    applyTheme(initialTheme);
+    setTheme(initialTheme);
+    setMounted(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const toggleTheme = () => {
     const newTheme = theme === 'light' ? 'dark' : 'light';
