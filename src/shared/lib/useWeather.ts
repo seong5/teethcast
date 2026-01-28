@@ -319,20 +319,24 @@ export function useWeather(): UseWeatherReturn {
         }
         const precipitation = ptyMap[ptyCode] || '없음'
 
-        // 풍속 (WSD) - 초단기실황은 실시간 데이터 (obsrValue 사용)
         const windItem = currentItems.find((item) => item.category === 'WSD')
         const windSpeedValue = windItem?.obsrValue || windItem?.fcstValue
         const windSpeed = safeParseFloat(windSpeedValue, 0)
 
-        // 최저기온 (TMN) - 단기예보에서 오늘 날짜 찾기
-        // 기상청 단기예보 API에서 fcstDate는 예보 대상 날짜입니다
+        // 최저기온 - 02시 발표 데이터 우선 사용
+        // 기상청 단기예보 API에서 02시 발표가 오늘 날짜의 최저/최고기온 예보를 포함합니다
         const today = dayjs().format('YYYYMMDD')
         const tomorrow = dayjs().add(1, 'day').format('YYYYMMDD')
 
-        // 최저기온 (TMN) 찾기 - 오늘 날짜의 예보 찾기
+        // 최저기온 (TMN) 찾기 - 02시 발표 데이터 우선, 없으면 05시 발표 데이터 사용
         const minTempItems = dailyItems.filter((item) => item.category === 'TMN')
-        // 오늘 날짜의 예보를 우선 찾고, 없으면 내일 날짜의 예보 사용
+
+        // 우선순위: 1) baseTime이 0200이고 오늘 날짜, 2) baseTime이 0200이고 내일 날짜, 3) baseTime이 0500이고 오늘 날짜, 4) baseTime이 0500이고 내일 날짜, 5) 오늘 날짜, 6) 내일 날짜, 7) 첫 번째 항목
         const minTempItem =
+          minTempItems.find((item) => item.baseTime === '0200' && item.fcstDate === today) ||
+          minTempItems.find((item) => item.baseTime === '0200' && item.fcstDate === tomorrow) ||
+          minTempItems.find((item) => item.baseTime === '0500' && item.fcstDate === today) ||
+          minTempItems.find((item) => item.baseTime === '0500' && item.fcstDate === tomorrow) ||
           minTempItems.find((item) => item.fcstDate === today) ||
           minTempItems.find((item) => item.fcstDate === tomorrow) ||
           minTempItems[0]
@@ -346,10 +350,15 @@ export function useWeather(): UseWeatherReturn {
         // 최저기온이 현재 기온보다 높으면 현재 기온으로 설정 (데이터 오류 방지)
         const minTemp = parsedMinTemp > temperature ? temperature - 2 : parsedMinTemp
 
-        // 최고기온 (TMX) 찾기 - 오늘 날짜의 예보 찾기
+        // 최고기온 (TMX) 찾기 - 02시 발표 데이터 우선, 없으면 05시 발표 데이터 사용
         const maxTempItems = dailyItems.filter((item) => item.category === 'TMX')
-        // 오늘 날짜의 예보를 우선 찾고, 없으면 내일 날짜의 예보 사용
+
+        // 우선순위: 1) baseTime이 0200이고 오늘 날짜, 2) baseTime이 0200이고 내일 날짜, 3) baseTime이 0500이고 오늘 날짜, 4) baseTime이 0500이고 내일 날짜, 5) 오늘 날짜, 6) 내일 날짜, 7) 첫 번째 항목
         const maxTempItem =
+          maxTempItems.find((item) => item.baseTime === '0200' && item.fcstDate === today) ||
+          maxTempItems.find((item) => item.baseTime === '0200' && item.fcstDate === tomorrow) ||
+          maxTempItems.find((item) => item.baseTime === '0500' && item.fcstDate === today) ||
+          maxTempItems.find((item) => item.baseTime === '0500' && item.fcstDate === tomorrow) ||
           maxTempItems.find((item) => item.fcstDate === today) ||
           maxTempItems.find((item) => item.fcstDate === tomorrow) ||
           maxTempItems[0]
