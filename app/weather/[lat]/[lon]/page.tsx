@@ -78,8 +78,8 @@ export default function WeatherDetailPage() {
 
   return (
     <main className="flex min-h-screen flex-col items-center px-4 py-8 sm:px-6 sm:py-12 md:px-8 md:py-16 lg:p-10 bg-white dark:bg-gray-900">
-      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm">
-        <div className="w-full max-w-3xl mx-auto mb-8">
+      <div className="z-10 max-w-7xl w-full items-center justify-between font-mono text-sm">
+        <div className="w-full max-w-5xl mx-auto mb-8">
           <div className="flex items-center justify-between">
             <button
               type="button"
@@ -103,7 +103,7 @@ export default function WeatherDetailPage() {
         )}
 
         {address && (
-          <div className="space-y-6 max-w-3xl mx-auto w-full">
+          <div className="space-y-6 max-w-5xl mx-auto w-full">
             {weather !== null && (
               <>
                 <div className="flex flex-col lg:flex-row lg:items-stretch gap-6">
