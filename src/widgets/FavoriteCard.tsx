@@ -66,6 +66,7 @@ export default function FavoriteCard({ favorite }: FavoriteCardProps) {
           longitude={favorite.longitude}
           name={favorite.name}
           size={28}
+          idOverride={favorite.id}
         />
       </div>
 

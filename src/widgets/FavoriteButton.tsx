@@ -1,7 +1,8 @@
 'use client'
 
+import { useMemo } from 'react'
 import { Star } from 'lucide-react'
-import { useFavorites } from '@/entities/favorite'
+import { useFavoritesStore } from '@/entities/favorite'
 
 export interface FavoriteButtonProps {
   latitude: number
@@ -9,6 +10,14 @@ export interface FavoriteButtonProps {
   name: string
   className?: string
   size?: number
+  /** 고정 ID를 강제로 사용할 때 (예: 현재 위치용 'current-location') */
+  idOverride?: string
+}
+
+function generateFavoriteId(lat: number, lon: number): string {
+  const roundedLat = Math.round(lat * 1000000) / 1000000
+  const roundedLon = Math.round(lon * 1000000) / 1000000
+  return `${roundedLat}-${roundedLon}`
 }
 
 export default function FavoriteButton({
@@ -17,10 +26,24 @@ export default function FavoriteButton({
   name,
   className = '',
   size = 24,
+  idOverride,
 }: FavoriteButtonProps) {
-  const { isFavorite, addFavorite, removeFavorite, getFavoriteId } = useFavorites()
-  const favoriteId = getFavoriteId(latitude, longitude)
-  const isFav = isFavorite(latitude, longitude)
+  // favorites 배열과 hydration 상태를 직접 구독
+  const favorites = useFavoritesStore((state) => state.favorites)
+  const hasHydrated = useFavoritesStore((state) => state._hasHydrated)
+  const addFavorite = useFavoritesStore((state) => state.addFavorite)
+  const removeFavorite = useFavoritesStore((state) => state.removeFavorite)
+
+  const favoriteId = useMemo(
+    () => (idOverride ? idOverride : generateFavoriteId(latitude, longitude)),
+    [latitude, longitude, idOverride],
+  )
+
+  // hydration이 완료된 후에만 즐겨찾기 여부를 계산
+  const isFav = useMemo(() => {
+    if (!hasHydrated) return false
+    return favorites.some((fav) => fav.id === favoriteId)
+  }, [favorites, favoriteId, hasHydrated])
 
   const handleToggle = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation()
@@ -28,11 +51,14 @@ export default function FavoriteButton({
     if (isFav) {
       removeFavorite(favoriteId)
     } else {
-      addFavorite({
-        name,
-        latitude,
-        longitude,
-      })
+      addFavorite(
+        {
+          name,
+          latitude,
+          longitude,
+        },
+        idOverride,
+      )
     }
   }
 

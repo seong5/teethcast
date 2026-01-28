@@ -197,6 +197,7 @@ export function HomePage() {
                         address={address.fullAddress}
                         latitude={position?.latitude}
                         longitude={position?.longitude}
+                        favoriteIdOverride="current-location"
                       />
                     </div>
                   </div>

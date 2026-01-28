@@ -9,9 +9,17 @@ export interface WeatherCardProps {
   address?: string
   latitude?: number
   longitude?: number
+  /** 즐겨찾기용 커스텀 ID (예: 현재 위치용 'current-location') */
+  favoriteIdOverride?: string
 }
 
-export default function WeatherCard({ weather, address, latitude, longitude }: WeatherCardProps) {
+export default function WeatherCard({
+  weather,
+  address,
+  latitude,
+  longitude,
+  favoriteIdOverride,
+}: WeatherCardProps) {
   return (
     <div className="w-full h-full">
       <div className="relative overflow-hidden bg-gradient-to-br from-blue-50 to-blue-100 dark:from-slate-800 dark:to-slate-900 rounded-3xl p-6 shadow-xl border border-white/20 dark:border-gray-700 h-full flex flex-col">
@@ -24,7 +32,13 @@ export default function WeatherCard({ weather, address, latitude, longitude }: W
           !Number.isNaN(latitude) &&
           !Number.isNaN(longitude) && (
             <div className="absolute top-4 right-4 z-10">
-              <FavoriteButton latitude={latitude} longitude={longitude} name={address} size={28} />
+              <FavoriteButton
+                latitude={latitude}
+                longitude={longitude}
+                name={address}
+                size={28}
+                idOverride={favoriteIdOverride}
+              />
             </div>
           )}
 

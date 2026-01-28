@@ -6,7 +6,9 @@ import type { FavoriteLocation } from './model'
 
 interface FavoritesStore {
   favorites: FavoriteLocation[]
-  addFavorite: (location: Omit<FavoriteLocation, 'id' | 'createdAt'>) => void
+  _hasHydrated: boolean
+  setHasHydrated: (hasHydrated: boolean) => void
+  addFavorite: (location: Omit<FavoriteLocation, 'id' | 'createdAt'>, customId?: string) => void
   removeFavorite: (id: string) => void
   isFavorite: (lat: number, lon: number) => boolean
   getFavoriteId: (lat: number, lon: number) => string
@@ -30,16 +32,24 @@ export const useFavoritesStore = create<FavoritesStore>()(
   persist(
     (set, get) => ({
       favorites: [],
+      _hasHydrated: false,
+
+      /* Hydration 완료 상태 설정 */
+      setHasHydrated: (hasHydrated: boolean) => {
+        set({ _hasHydrated: hasHydrated })
+      },
 
       /**
        * 즐겨찾기 추가
        * @param location 즐겨찾기할 위치 정보
+       * @param customId 커스텀 ID (예: 현재 위치용 'current-location')
        */
-      addFavorite: (location) => {
-        const id = generateFavoriteId(location.latitude, location.longitude)
-        
-        // 이미 즐겨찾기에 있는지 확인
-        if (get().isFavorite(location.latitude, location.longitude)) {
+      addFavorite: (location, customId) => {
+        const id = customId ?? generateFavoriteId(location.latitude, location.longitude)
+
+        // 이미 같은 ID의 즐겨찾기가 있는지 확인
+        const exists = get().favorites.some((fav) => fav.id === id)
+        if (exists) {
           return
         }
 
@@ -85,9 +95,7 @@ export const useFavoritesStore = create<FavoritesStore>()(
         return generateFavoriteId(lat, lon)
       },
 
-      /**
-       * 모든 즐겨찾기 제거
-       */
+      /* 모든 즐겨찾기 제거 */
       clearAll: () => {
         set({ favorites: [] })
       },
@@ -95,16 +103,23 @@ export const useFavoritesStore = create<FavoritesStore>()(
     {
       name: 'teethcast-favorites', // localStorage 키 이름
       version: 1, // 스키마 버전 (나중에 마이그레이션 시 사용)
+      onRehydrateStorage: () => (state) => {
+        // hydration 완료 시 플래그 설정
+        if (state) {
+          state.setHasHydrated(true)
+        }
+      },
+      partialize: (state) => ({
+        favorites: state.favorites,
+      }),
     },
   ),
 )
 
-/**
- * 즐겨찾기 Hook (편의를 위한 wrapper)
- * 컴포넌트에서 사용하기 편하도록 hook 형태로 제공
- */
+/* 즐겨찾기 Hook 컴포넌트에서 사용하기 편하도록 hook 형태로 제공 */
 export function useFavorites() {
   const favorites = useFavoritesStore((state) => state.favorites)
+  const hasHydrated = useFavoritesStore((state) => state._hasHydrated)
   const addFavorite = useFavoritesStore((state) => state.addFavorite)
   const removeFavorite = useFavoritesStore((state) => state.removeFavorite)
   const isFavorite = useFavoritesStore((state) => state.isFavorite)
@@ -113,6 +128,7 @@ export function useFavorites() {
 
   return {
     favorites,
+    hasHydrated,
     addFavorite,
     removeFavorite,
     isFavorite,
