@@ -13,6 +13,15 @@ export interface HourlyWeather {
   precipitation: string // 강수형태
 }
 
+export interface DailyWeather {
+  date: string // 날짜 (예: "2026-01-28")
+  dateLabel: string // 날짜 라벨 (예: "오늘", "내일", "모레", "01/28")
+  minTemp: number // 최저기온
+  maxTemp: number // 최고기온
+  sky: string // 하늘상태 (맑음, 구름많음, 흐림)
+  precipitation: string // 강수형태 (없음, 비, 눈, 비/눈)
+}
+
 export interface WeatherData {
   temperature: number // 현재 기온
   humidity: number // 습도
@@ -22,6 +31,7 @@ export interface WeatherData {
   minTemp: number // 최저기온
   maxTemp: number // 최고기온
   hourly: HourlyWeather[] // 시간대별 날씨 (6시간)
+  daily: DailyWeather[] // 일별 날씨 (3일)
   baseTime?: string // 업데이트 기준 시간 (예: "2026-01-28 14:00")
 }
 
@@ -323,10 +333,19 @@ export function useWeather(): UseWeatherReturn {
         const windSpeedValue = windItem?.obsrValue || windItem?.fcstValue
         const windSpeed = safeParseFloat(windSpeedValue, 0)
 
-        // 최저기온 - 02시 발표 데이터 우선 사용
-        // 기상청 단기예보 API에서 02시 발표가 오늘 날짜의 최저/최고기온 예보를 포함합니다
+        // 날짜 계산 (오늘, 내일, 모레)
         const today = dayjs().format('YYYYMMDD')
         const tomorrow = dayjs().add(1, 'day').format('YYYYMMDD')
+        const dayAfterTomorrow = dayjs().add(2, 'day').format('YYYYMMDD')
+        
+        // 날짜 라벨 생성
+        const getDateLabel = (dateStr: string, index: number): string => {
+          const date = dayjs(dateStr, 'YYYYMMDD')
+          if (index === 0) return '오늘'
+          if (index === 1) return '내일'
+          if (index === 2) return '모레'
+          return date.format('MM/DD')
+        }
 
         // 최저기온 (TMN) 찾기 - 02시 발표 데이터 우선, 없으면 05시 발표 데이터 사용
         const minTempItems = dailyItems.filter((item) => item.category === 'TMN')
@@ -371,6 +390,99 @@ export function useWeather(): UseWeatherReturn {
           : temperature + 5
         // 최고기온이 현재 기온보다 낮으면 현재 기온으로 설정 (데이터 오류 방지)
         const maxTemp = parsedMaxTemp < temperature ? temperature + 2 : parsedMaxTemp
+
+        // 3일 예보 데이터 생성
+        const dailyWeather: DailyWeather[] = []
+        const forecastDates = [today, tomorrow, dayAfterTomorrow]
+
+        for (let i = 0; i < forecastDates.length; i++) {
+          const forecastDate = forecastDates[i]
+
+          // 해당 날짜의 최저기온 (TMN) 찾기
+          const dateMinTempItems = minTempItems.filter(
+            (item) => item.fcstDate === forecastDate && item.baseTime === '0200',
+          )
+          const dateMinTempItem =
+            dateMinTempItems.find((item) => item.baseTime === '0200') ||
+            minTempItems.find((item) => item.fcstDate === forecastDate)
+
+          // 해당 날짜의 최고기온 (TMX) 찾기
+          const dateMaxTempItems = maxTempItems.filter(
+            (item) => item.fcstDate === forecastDate && item.baseTime === '0200',
+          )
+          const dateMaxTempItem =
+            dateMaxTempItems.find((item) => item.baseTime === '0200') ||
+            maxTempItems.find((item) => item.fcstDate === forecastDate)
+
+          // 해당 날짜의 하늘상태 (SKY) - 오후 시간대(12시~18시)의 평균 또는 가장 빈도 높은 값
+          const dateSkyItems = dailyItems.filter(
+            (item) =>
+              item.category === 'SKY' &&
+              item.fcstDate === forecastDate &&
+              item.fcstTime &&
+              parseInt(item.fcstTime, 10) >= 1200 &&
+              parseInt(item.fcstTime, 10) <= 1800,
+          )
+          // 가장 빈도 높은 하늘상태 코드 찾기
+          const skyCodeCounts: Record<number, number> = {}
+          dateSkyItems.forEach((item) => {
+            const code = safeParseInt(item.fcstValue, 1)
+            skyCodeCounts[code] = (skyCodeCounts[code] || 0) + 1
+          })
+          const mostCommonSkyCode =
+            Object.keys(skyCodeCounts).length > 0
+              ? parseInt(
+                  Object.entries(skyCodeCounts).sort((a, b) => b[1] - a[1])[0][0],
+                  10,
+                )
+              : 1
+          const dateSky = skyMap[mostCommonSkyCode] || '맑음'
+
+          // 해당 날짜의 강수형태 (PTY) - 오후 시간대(12시~18시)의 평균 또는 가장 빈도 높은 값
+          const datePtyItems = dailyItems.filter(
+            (item) =>
+              item.category === 'PTY' &&
+              item.fcstDate === forecastDate &&
+              item.fcstTime &&
+              parseInt(item.fcstTime, 10) >= 1200 &&
+              parseInt(item.fcstTime, 10) <= 1800,
+          )
+          const ptyCodeCounts: Record<number, number> = {}
+          datePtyItems.forEach((item) => {
+            const code = safeParseInt(item.fcstValue, 0)
+            ptyCodeCounts[code] = (ptyCodeCounts[code] || 0) + 1
+          })
+          const mostCommonPtyCode =
+            Object.keys(ptyCodeCounts).length > 0
+              ? parseInt(
+                  Object.entries(ptyCodeCounts).sort((a, b) => b[1] - a[1])[0][0],
+                  10,
+                )
+              : 0
+          const datePrecipitation = ptyMap[mostCommonPtyCode] || '없음'
+
+          // 온도 파싱
+          const dateMinTemp = dateMinTempItem?.fcstValue
+            ? safeParseFloat(dateMinTempItem.fcstValue, temperature - 5)
+            : i === 0
+              ? minTemp
+              : temperature - 5 - i * 2
+
+          const dateMaxTemp = dateMaxTempItem?.fcstValue
+            ? safeParseFloat(dateMaxTempItem.fcstValue, temperature + 5)
+            : i === 0
+              ? maxTemp
+              : temperature + 5 - i * 2
+
+          dailyWeather.push({
+            date: dayjs(forecastDate, 'YYYYMMDD').format('YYYY-MM-DD'),
+            dateLabel: getDateLabel(forecastDate, i),
+            minTemp: dateMinTemp,
+            maxTemp: dateMaxTemp,
+            sky: dateSky,
+            precipitation: datePrecipitation,
+          })
+        }
 
         // 시간대별 날씨 데이터 생성 (초단기예보에서 앞으로 6시간)
         const hourlyWeather: HourlyWeather[] = []
@@ -432,6 +544,7 @@ export function useWeather(): UseWeatherReturn {
           minTemp,
           maxTemp,
           hourly: hourlyWeather,
+          daily: dailyWeather,
           baseTime: baseTimeFormatted,
         }
 

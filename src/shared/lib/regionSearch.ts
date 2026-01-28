@@ -1,30 +1,22 @@
-/**
- * 행정구역 JSON 데이터를 로드하고 검색하는 유틸리티
- */
+/* 행정구역 JSON 데이터를 로드하고 검색하는 유틸리티 */
 
 import { isHierarchicalRegions } from '@/shared/types/guards'
 import { fetchAPIWithGuard } from '@/shared/api/fetch'
 
-// 계층 구조 타입 정의
 export type HierarchicalRegions = {
   [sido: string]: {
-    [sigungu: string]: string[] // 동/읍/면 배열
+    [sigungu: string]: string[]
   }
 }
 
-// 행정구역 데이터 캐시
 let regionsCache: HierarchicalRegions | null = null
 
-/**
- * 행정구역 JSON 파일을 로드
- */
 export async function loadRegions(): Promise<HierarchicalRegions> {
   if (regionsCache) {
     return regionsCache
   }
 
   try {
-    // 타입 가드를 사용한 안전한 fetch
     const data = await fetchAPIWithGuard<HierarchicalRegions>(
       '/data/regions.json',
       isHierarchicalRegions,
@@ -67,29 +59,21 @@ export function searchRegions(query: string, regions: HierarchicalRegions): stri
   const results: Array<{ sido: string; sigungu: string; dong?: string }> = []
 
   if (parts.length === 1) {
-    // 1단어 검색
     const word = parts[0]
 
-    // 시/도 검색
     if (regions[word]) {
-      // 해당 시/도의 모든 시/군/구 반환
       Object.keys(regions[word]).forEach((sigungu) => {
         results.push({ sido: word, sigungu })
       })
     } else {
-      // 시/군/구 또는 동 검색 (전체 순회)
       Object.keys(regions).forEach((sido) => {
         Object.keys(regions[sido]).forEach((sigungu) => {
-          // 시/군/구 검색
           if (sigungu.toLowerCase().includes(word.toLowerCase())) {
-            // 시/군/구 레벨 결과 추가
             results.push({ sido, sigungu })
-            // 해당 시/군/구의 모든 동도 추가
             regions[sido][sigungu].forEach((dong) => {
               results.push({ sido, sigungu, dong })
             })
           } else {
-            // 동 검색 (시/군/구가 일치하지 않는 경우만)
             regions[sido][sigungu].forEach((dong) => {
               if (dong.toLowerCase().includes(word.toLowerCase())) {
                 results.push({ sido, sigungu, dong })
@@ -100,17 +84,13 @@ export function searchRegions(query: string, regions: HierarchicalRegions): stri
       })
     }
   } else if (parts.length === 2) {
-    // 2단어 검색: "서울특별시 종로구"
     const [sido, sigungu] = parts
 
-    // 정확한 경로 검색
     if (regions[sido]?.[sigungu]) {
-      // 해당 시/군/구의 모든 동 반환
       regions[sido][sigungu].forEach((dong) => {
         results.push({ sido, sigungu, dong })
       })
     } else {
-      // 부분 일치 검색
       Object.keys(regions).forEach((s) => {
         if (s.toLowerCase().includes(sido.toLowerCase())) {
           Object.keys(regions[s]).forEach((sg) => {
@@ -124,14 +104,11 @@ export function searchRegions(query: string, regions: HierarchicalRegions): stri
       })
     }
   } else if (parts.length >= 3) {
-    // 3단어 이상 검색: "서울특별시 종로구 청운동"
     const [sido, sigungu, dong] = parts
 
-    // 정확한 경로 검색
     if (regions[sido]?.[sigungu]?.includes(dong)) {
       results.push({ sido, sigungu, dong })
     } else {
-      // 부분 일치 검색
       Object.keys(regions).forEach((s) => {
         if (s.toLowerCase().includes(sido.toLowerCase())) {
           Object.keys(regions[s]).forEach((sg) => {
@@ -148,7 +125,6 @@ export function searchRegions(query: string, regions: HierarchicalRegions): stri
     }
   }
 
-  // 중복 제거
   const uniqueResults = results.reduce(
     (acc, current) => {
       const exists = acc.find(
@@ -165,7 +141,6 @@ export function searchRegions(query: string, regions: HierarchicalRegions): stri
     [] as Array<{ sido: string; sigungu: string; dong?: string }>,
   )
 
-  // 정확도 순으로 정렬 (정확히 일치하는 것 우선)
   const queryLowerForSort = trimmed.toLowerCase()
   uniqueResults.sort((a, b) => {
     const aStr = `${a.sido} ${a.sigungu} ${a.dong || ''}`.trim().toLowerCase()
@@ -179,7 +154,6 @@ export function searchRegions(query: string, regions: HierarchicalRegions): stri
     return 0
   })
 
-  // 최대 10개만 반환
   const limitedResults = uniqueResults.slice(0, 10)
 
   return formatSearchResults(limitedResults)

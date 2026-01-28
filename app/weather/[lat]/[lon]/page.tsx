@@ -6,6 +6,7 @@ import { ArrowLeft } from 'lucide-react'
 import { ClockIcon, CloudIcon } from '@/shared/ui/WeatherIcon'
 import WeatherCard from '@/widgets/WeatherCard'
 import HourlyWeatherCard from '@/widgets/HourlyWeather'
+import DailyWeatherCard from '@/widgets/DailyWeather'
 import { useReverseGeocoding, useWeather } from '@/shared/lib'
 import type { UseWeatherReturn } from '@/shared/lib'
 
@@ -21,8 +22,12 @@ export default function WeatherDetailPage() {
     isLoading: addressLoading,
     getAddressFromCoordinates,
   } = useReverseGeocoding()
-  const { weather, error: weatherError, isLoading: weatherLoading, getWeather }: UseWeatherReturn =
-    useWeather()
+  const {
+    weather,
+    error: weatherError,
+    isLoading: weatherLoading,
+    getWeather,
+  }: UseWeatherReturn = useWeather()
 
   useEffect(() => {
     // 좌표가 유효한지 확인 (NaN이 아니고 0이 아닌 경우)
@@ -58,9 +63,7 @@ export default function WeatherDetailPage() {
           <h1 className="text-2xl font-bold text-gray-800 dark:text-white mb-4">
             잘못된 위치 정보입니다
           </h1>
-          <p className="text-gray-500 dark:text-gray-400 mb-4">
-            올바른 좌표 정보가 필요합니다.
-          </p>
+          <p className="text-gray-500 dark:text-gray-400 mb-4">올바른 좌표 정보가 필요합니다.</p>
           <button
             type="button"
             onClick={() => router.back()}
@@ -103,19 +106,37 @@ export default function WeatherDetailPage() {
           <div className="space-y-6 max-w-3xl mx-auto w-full">
             {weather !== null && (
               <>
-                <div>
-                  <div className="mb-4 flex items-center gap-4">
-                    <h2 className="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2">
-                      <CloudIcon size={20} />
-                      현재 날씨
-                    </h2>
-                    {weather.baseTime && (
-                      <span className="text-xs text-gray-500 dark:text-gray-400">
-                        업데이트: {weather.baseTime}
-                      </span>
-                    )}
+                <div className="flex flex-col lg:flex-row lg:items-stretch gap-6">
+                  <div className="flex-1 flex flex-col">
+                    <div className="mb-4 flex items-center gap-4">
+                      <h2 className="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2">
+                        <CloudIcon size={20} />
+                        현재 날씨
+                      </h2>
+                      {weather.baseTime && (
+                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                          업데이트: {weather.baseTime}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <WeatherCard weather={weather} address={address.fullAddress} />
+                    </div>
                   </div>
-                  <WeatherCard weather={weather} address={address.fullAddress} />
+
+                  {weather.daily && weather.daily.length > 0 && (
+                    <div className="flex-1 lg:max-w-md flex flex-col">
+                      <div className="mb-4 flex items-center gap-4">
+                        <h2 className="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2">
+                          <CloudIcon size={20} />
+                          단기 예보
+                        </h2>
+                      </div>
+                      <div className="flex-1">
+                        <DailyWeatherCard daily={weather.daily} />
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {weather.hourly && (

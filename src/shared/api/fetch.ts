@@ -1,6 +1,4 @@
-/**
- * 제네릭 API 클라이언트 함수
- */
+/* 제네릭 API 클라이언트 함수 */
 
 /**
  * 타입 안전한 fetch 함수
@@ -8,10 +6,7 @@
  * @param options fetch 옵션
  * @returns 타입 안전한 응답 데이터
  */
-export async function fetchAPI<T>(
-  url: string,
-  options?: RequestInit,
-): Promise<T> {
+export async function fetchAPI<T>(url: string, options?: RequestInit): Promise<T> {
   const response = await fetch(url, options)
 
   if (!response.ok) {

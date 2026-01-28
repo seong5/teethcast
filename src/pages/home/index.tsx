@@ -6,6 +6,7 @@ import { SearchBar } from '@/shared/ui'
 import { ClockIcon, CloudIcon } from '@/shared/ui/WeatherIcon'
 import WeatherCard from '@/widgets/WeatherCard'
 import HourlyWeatherCard from '@/widgets/HourlyWeather'
+import DailyWeatherCard from '@/widgets/DailyWeather'
 import SearchResults from '@/features/search/SearchResults'
 import { useGeolocation, useReverseGeocoding, useWeather, useLocationSearch } from '@/shared/lib'
 import type { UseLocationSearchReturn } from '@/shared/lib'
@@ -130,8 +131,8 @@ export function HomePage() {
 
   return (
     <main className="flex min-h-screen flex-col items-center px-4 py-8 sm:px-6 sm:py-12 md:px-8 md:py-16 lg:p-10 bg-white dark:bg-gray-900">
-      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm">
-        <div ref={searchContainerRef} className="w-full max-w-3xl mx-auto mb-8 relative">
+      <div className="z-10 max-w-7xl w-full items-center justify-between font-mono text-sm">
+        <div ref={searchContainerRef} className="w-full max-w-5xl mx-auto mb-8 relative">
           <SearchBar
             value={searchValue}
             onChange={setSearchValue}
@@ -174,22 +175,40 @@ export function HomePage() {
         )}
 
         {address && (
-          <div className="space-y-6 max-w-3xl mx-auto w-full">
+          <div className="space-y-6 max-w-5xl mx-auto w-full">
             {weather !== null && (
               <>
-                <div>
-                  <div className="mb-4 flex items-center gap-4">
-                    <h2 className="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2">
-                      <CloudIcon size={20} />
-                      현재 날씨
-                    </h2>
-                    {weather.baseTime && (
-                      <span className="text-xs text-gray-500 dark:text-gray-400">
-                        업데이트: {weather.baseTime}
-                      </span>
-                    )}
+                <div className="flex flex-col lg:flex-row lg:items-stretch gap-6">
+                  <div className="flex-1 flex flex-col">
+                    <div className="mb-4 flex items-center gap-4">
+                      <h2 className="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2">
+                        <CloudIcon size={20} />
+                        현재 날씨
+                      </h2>
+                      {weather.baseTime && (
+                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                          업데이트: {weather.baseTime}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <WeatherCard weather={weather} address={address.fullAddress} />
+                    </div>
                   </div>
-                  <WeatherCard weather={weather} address={address.fullAddress} />
+
+                  {weather.daily && weather.daily.length > 0 && (
+                    <div className="flex-1 lg:max-w-md flex flex-col">
+                      <div className="mb-4 flex items-center gap-4">
+                        <h2 className="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2">
+                          <CloudIcon size={20} />
+                          단기 예보
+                        </h2>
+                      </div>
+                      <div className="flex-1">
+                        <DailyWeatherCard daily={weather.daily} />
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {weather.hourly && (
