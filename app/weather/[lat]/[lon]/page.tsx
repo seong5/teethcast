@@ -1,17 +1,16 @@
 'use client'
 
 import { useEffect } from 'react'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
+import { ArrowLeft } from 'lucide-react'
 import { ClockIcon, CloudIcon } from '@/shared/ui/WeatherIcon'
 import WeatherCard from '@/widgets/WeatherCard'
 import HourlyWeatherCard from '@/widgets/HourlyWeather'
-import {
-  useReverseGeocoding,
-  useWeather,
-} from '@/shared/lib'
+import { useReverseGeocoding, useWeather } from '@/shared/lib'
 import type { WeatherData } from '@/shared/lib/useWeather'
 
 export default function WeatherDetailPage() {
+  const router = useRouter()
   const params = useParams()
   const lat = params?.lat ? parseFloat(params.lat as string) : NaN
   const lon = params?.lon ? parseFloat(params.lon as string) : NaN
@@ -41,9 +40,7 @@ export default function WeatherDetailPage() {
           <h1 className="text-2xl font-bold text-gray-800 dark:text-white mb-4">
             잘못된 위치 정보입니다
           </h1>
-          <p className="text-gray-500 dark:text-gray-400">
-            올바른 좌표 정보가 필요합니다.
-          </p>
+          <p className="text-gray-500 dark:text-gray-400">올바른 좌표 정보가 필요합니다.</p>
         </div>
       </main>
     )
@@ -52,6 +49,18 @@ export default function WeatherDetailPage() {
   return (
     <main className="flex min-h-screen flex-col items-center px-4 py-8 sm:px-6 sm:py-12 md:px-8 md:py-16 lg:p-10 bg-white dark:bg-gray-900">
       <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm">
+        <div className="w-full max-w-3xl mx-auto mb-8">
+          <div className="flex items-center justify-between">
+            <button
+              type="button"
+              onClick={() => router.back()}
+              className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5" />
+              <span className="text-sm font-medium">뒤로가기</span>
+            </button>
+          </div>
+        </div>
         {(addressLoading || weatherLoading) && (
           <div className="text-center text-sm text-gray-500 dark:text-gray-400 mb-4">
             날씨를 확인하는 중...
@@ -79,10 +88,7 @@ export default function WeatherDetailPage() {
                       </span>
                     )}
                   </div>
-                  <WeatherCard
-                    weather={weather as WeatherData}
-                    address={address.fullAddress}
-                  />
+                  <WeatherCard weather={weather as WeatherData} address={address.fullAddress} />
                 </div>
 
                 {(weather as WeatherData).hourly && (
