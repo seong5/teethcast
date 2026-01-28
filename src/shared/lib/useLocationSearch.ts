@@ -1,18 +1,17 @@
 'use client'
 
 import { useState, useCallback } from 'react'
-import { apiClient } from '@/shared/api'
+import { normalizeSidoName } from './formatAddress'
+import { loadRegions, searchRegions, parseAddress } from './regionSearch'
 
 export interface LocationSearchResult {
   id: string
-  placeName: string // 장소명
-  addressName: string // 전체 지번 주소
-  roadAddressName: string // 전체 도로명 주소
-  x: number // 경도
-  y: number // 위도
+  formattedAddress: string // 포맷팅된 주소 (예: "대전광역시 서구 복수동")
   region1depthName: string // 시/도
   region2depthName: string // 시/군/구
   region3depthName?: string // 동/읍/면
+  x: number // 경도 (초기값 0, 선택 시 카카오 API로 가져옴)
+  y: number // 위도 (초기값 0, 선택 시 카카오 API로 가져옴)
 }
 
 interface UseLocationSearchReturn {
@@ -21,35 +20,6 @@ interface UseLocationSearchReturn {
   isLoading: boolean
   search: (query: string) => Promise<void>
   clearResults: () => void
-}
-
-// 카카오 API 응답 타입
-interface KakaoSearchDocument {
-  id: string
-  place_name: string
-  address_name: string
-  road_address_name?: string
-  x: string // 경도 (문자열)
-  y: string // 위도 (문자열)
-  address?: {
-    region_1depth_name: string
-    region_2depth_name: string
-    region_3depth_name?: string
-  }
-  road_address?: {
-    region_1depth_name: string
-    region_2depth_name: string
-    region_3depth_name?: string
-  }
-}
-
-interface KakaoSearchResponse {
-  documents: KakaoSearchDocument[]
-  meta: {
-    total_count: number
-    pageable_count: number
-    is_end: boolean
-  }
 }
 
 export function useLocationSearch(): UseLocationSearchReturn {
@@ -67,49 +37,49 @@ export function useLocationSearch(): UseLocationSearchReturn {
     setError(null)
 
     try {
-      const apiKey = process.env.NEXT_PUBLIC_KAKAO_REST_API_KEY
+      // 행정구역 JSON 파일 로드
+      const regions = await loadRegions()
 
-      if (!apiKey) {
-        throw new Error(
-          '카카오 API 키가 설정되지 않았습니다. 환경변수에 NEXT_PUBLIC_KAKAO_REST_API_KEY를 설정해주세요.',
-        )
+      if (Object.keys(regions).length === 0) {
+        throw new Error('행정구역 데이터를 불러올 수 없습니다.')
       }
 
-      // 카카오 키워드 검색 API
-      const response = await apiClient.get<KakaoSearchResponse>(
-        `https://dapi.kakao.com/v2/local/search/keyword.json`,
-        {
-          params: {
-            query: query.trim(),
-            size: 10,
-          },
-          headers: {
-            Authorization: `KakaoAK ${apiKey}`,
-          },
-        },
-      )
-
-      const documents = response.data.documents
+      // 검색 수행 (계층 구조에서 검색)
+      const searchResults = searchRegions(query.trim(), regions)
 
       // 검색 결과를 LocationSearchResult 형식으로 변환
-      const searchResults: LocationSearchResult[] = documents.map((doc) => {
-        // 주소 정보는 road_address 우선, 없으면 address 사용
-        const addressData = doc.road_address || doc.address
+      const results: LocationSearchResult[] = searchResults.map((address, index) => {
+        const parsed = parseAddress(address)
+
+        // region1depthName을 풀네임으로 정규화
+        const normalizedSido = normalizeSidoName(parsed.sido)
+
+        // formattedAddress도 정규화된 시/도로 업데이트
+        const parts = address.split(' ')
+        parts[0] = normalizedSido
+        const normalizedFormattedAddress = parts.join(' ')
 
         return {
-          id: doc.id,
-          placeName: doc.place_name,
-          addressName: doc.address_name,
-          roadAddressName: doc.road_address_name || doc.address_name,
-          x: parseFloat(doc.x),
-          y: parseFloat(doc.y),
-          region1depthName: addressData?.region_1depth_name || '',
-          region2depthName: addressData?.region_2depth_name || '',
-          region3depthName: addressData?.region_3depth_name,
+          id: `region-${index}-${address}`,
+          formattedAddress: normalizedFormattedAddress,
+          region1depthName: normalizedSido,
+          region2depthName: parsed.sigungu,
+          region3depthName: parsed.dong,
+          x: 0, // 초기값, 선택 시 카카오 API로 가져옴
+          y: 0, // 초기값, 선택 시 카카오 API로 가져옴
         }
       })
 
-      setResults(searchResults)
+      // 중복 제거 (같은 formattedAddress를 가진 결과는 하나만)
+      const uniqueResults = results.reduce((acc, current) => {
+        const exists = acc.find((item) => item.formattedAddress === current.formattedAddress)
+        if (!exists) {
+          acc.push(current)
+        }
+        return acc
+      }, [] as LocationSearchResult[])
+
+      setResults(uniqueResults)
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message)

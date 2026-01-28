@@ -61,11 +61,44 @@ export function HomePage() {
     }
   }
 
-  const handleSelectLocation = (result: LocationSearchResult) => {
+  const handleSelectLocation = async (result: LocationSearchResult) => {
+    let lat = result.y
+    let lon = result.x
+
+    // 좌표가 없으면 카카오 API로 검색하여 좌표 가져오기
+    if (lat === 0 && lon === 0) {
+      try {
+        const apiKey = process.env.NEXT_PUBLIC_KAKAO_REST_API_KEY
+        if (!apiKey) {
+          throw new Error('카카오 API 키가 설정되지 않았습니다.')
+        }
+
+        // 카카오 키워드 검색 API로 주소 검색
+        const response = await fetch(
+          `https://dapi.kakao.com/v2/local/search/keyword.json?query=${encodeURIComponent(result.formattedAddress)}&size=1`,
+          {
+            headers: {
+              Authorization: `KakaoAK ${apiKey}`,
+            },
+          },
+        )
+
+        if (response.ok) {
+          const data = await response.json()
+          if (data.documents && data.documents.length > 0) {
+            const doc = data.documents[0]
+            lat = parseFloat(doc.y)
+            lon = parseFloat(doc.x)
+          }
+        }
+      } catch (err) {
+        console.error('좌표 가져오기 실패:', err)
+        // 좌표를 가져오지 못해도 계속 진행 (기본값 사용)
+      }
+    }
+
     // 다이나믹 라우트로 이동: /weather/[lat]/[lon]
-    const lat = result.y.toFixed(6)
-    const lon = result.x.toFixed(6)
-    router.push(`/weather/${lat}/${lon}`)
+    router.push(`/weather/${lat.toFixed(6)}/${lon.toFixed(6)}`)
     setSearchValue('')
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     clearResults()

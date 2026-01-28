@@ -16,9 +16,7 @@ export default function SearchResults({
   if (isLoading) {
     return (
       <div className="mt-2 rounded-2xl border border-gray-100 bg-white p-4 shadow-lg dark:border-gray-700 dark:bg-gray-800">
-        <div className="text-center text-sm text-gray-500 dark:text-gray-400">
-          검색 중...
-        </div>
+        <div className="text-center text-sm text-gray-500 dark:text-gray-400">검색 중...</div>
       </div>
     )
   }
@@ -38,16 +36,8 @@ export default function SearchResults({
               className="w-full px-4 py-3 text-left transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/50"
             >
               <div className="font-medium text-gray-900 dark:text-white">
-                {result.placeName}
+                {result.formattedAddress}
               </div>
-              <div className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                {result.roadAddressName || result.addressName}
-              </div>
-              {result.region3depthName && (
-                <div className="mt-1 text-xs text-gray-400 dark:text-gray-500">
-                  {result.region1depthName} {result.region2depthName} {result.region3depthName}
-                </div>
-              )}
             </button>
           </li>
         ))}
