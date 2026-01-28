@@ -14,7 +14,7 @@ export interface LocationSearchResult {
   y: number // 위도 (초기값 0, 선택 시 카카오 API로 가져옴)
 }
 
-interface UseLocationSearchReturn {
+export interface UseLocationSearchReturn {
   results: LocationSearchResult[]
   error: string | null
   isLoading: boolean

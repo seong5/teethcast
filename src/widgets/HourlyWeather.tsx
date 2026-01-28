@@ -3,12 +3,12 @@
 import WeatherIcon from '@/shared/ui/WeatherIcon'
 import type { HourlyWeather } from '@/shared/lib/useWeather'
 
-interface HourlyWeatherProps {
+export interface HourlyWeatherCardProps {
   hourly: HourlyWeather[]
   baseTime?: string
 }
 
-export default function HourlyWeatherCard({ hourly, baseTime }: HourlyWeatherProps) {
+export default function HourlyWeatherCard({ hourly, baseTime }: HourlyWeatherCardProps) {
   if (!hourly || hourly.length === 0) {
     return null
   }
@@ -42,7 +42,7 @@ export default function HourlyWeatherCard({ hourly, baseTime }: HourlyWeatherPro
                     />
                   </div>
                   <div className="text-xl font-bold text-gray-900 dark:text-white tracking-tight">
-                    {hourlyItem.temperature}°
+                    {Math.round(hourlyItem.temperature * 10) / 10}°
                   </div>
                 </div>
 

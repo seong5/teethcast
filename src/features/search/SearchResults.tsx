@@ -2,7 +2,7 @@
 
 import type { LocationSearchResult } from '@/shared/lib/useLocationSearch'
 
-interface SearchResultsProps {
+export interface SearchResultsProps {
   results: LocationSearchResult[]
   onSelect: (result: LocationSearchResult) => void
   isLoading?: boolean

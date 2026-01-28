@@ -2,6 +2,9 @@
  * 행정구역 JSON 데이터를 로드하고 검색하는 유틸리티
  */
 
+import { isHierarchicalRegions } from '@/shared/types/guards'
+import { fetchAPIWithGuard } from '@/shared/api/fetch'
+
 // 계층 구조 타입 정의
 export type HierarchicalRegions = {
   [sido: string]: {
@@ -21,12 +24,12 @@ export async function loadRegions(): Promise<HierarchicalRegions> {
   }
 
   try {
-    const response = await fetch('/data/regions.json')
-    if (!response.ok) {
-      throw new Error('행정구역 데이터를 불러올 수 없습니다.')
-    }
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const data = (await response.json()) as HierarchicalRegions
+    // 타입 가드를 사용한 안전한 fetch
+    const data = await fetchAPIWithGuard<HierarchicalRegions>(
+      '/data/regions.json',
+      isHierarchicalRegions,
+    )
+
     regionsCache = data
     return data
   } catch (error) {

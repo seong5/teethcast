@@ -7,14 +7,12 @@ import { ClockIcon, CloudIcon } from '@/shared/ui/WeatherIcon'
 import WeatherCard from '@/widgets/WeatherCard'
 import HourlyWeatherCard from '@/widgets/HourlyWeather'
 import SearchResults from '@/features/search/SearchResults'
-import {
-  useGeolocation,
-  useReverseGeocoding,
-  useWeather,
-  useLocationSearch,
-} from '@/shared/lib'
-import type { WeatherData } from '@/shared/lib/useWeather'
+import { useGeolocation, useReverseGeocoding, useWeather, useLocationSearch } from '@/shared/lib'
+import type { UseLocationSearchReturn } from '@/shared/lib'
 import type { LocationSearchResult } from '@/shared/lib/useLocationSearch'
+import type { KakaoSearchResponse } from '@/shared/types/kakao'
+import { fetchAPIWithGuard } from '@/shared/api'
+import { isKakaoSearchResponse } from '@/shared/types/guards'
 
 export function HomePage() {
   const router = useRouter()
@@ -27,16 +25,14 @@ export function HomePage() {
     isLoading: addressLoading,
     getAddressFromCoordinates,
   } = useReverseGeocoding()
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
   const { weather, error: weatherError, isLoading: weatherLoading, getWeather } = useWeather()
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const {
     results: searchResults,
     error: searchError,
     isLoading: searchLoading,
     search: searchLocation,
     clearResults,
-  } = useLocationSearch()
+  }: UseLocationSearchReturn = useLocationSearch()
 
   useEffect(() => {
     // 페이지 로드 시 자동으로 현재 위치 감지
@@ -46,20 +42,19 @@ export function HomePage() {
   useEffect(() => {
     if (position) {
       getAddressFromCoordinates(position.latitude, position.longitude)
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       getWeather(position.latitude, position.longitude)
     }
   }, [position, getAddressFromCoordinates, getWeather])
 
   const handleSearch = () => {
     if (searchValue.trim()) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       searchLocation(searchValue)
     } else {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       clearResults()
     }
   }
+
+  const [isGettingCoordinates, setIsGettingCoordinates] = useState(false)
 
   const handleSelectLocation = async (result: LocationSearchResult) => {
     let lat = result.y
@@ -67,15 +62,17 @@ export function HomePage() {
 
     // 좌표가 없으면 카카오 API로 검색하여 좌표 가져오기
     if (lat === 0 && lon === 0) {
+      setIsGettingCoordinates(true)
       try {
         const apiKey = process.env.NEXT_PUBLIC_KAKAO_REST_API_KEY
         if (!apiKey) {
           throw new Error('카카오 API 키가 설정되지 않았습니다.')
         }
 
-        // 카카오 키워드 검색 API로 주소 검색
-        const response = await fetch(
+        // 카카오 키워드 검색 API로 주소 검색 (타입 가드 사용)
+        const data = await fetchAPIWithGuard<KakaoSearchResponse>(
           `https://dapi.kakao.com/v2/local/search/keyword.json?query=${encodeURIComponent(result.formattedAddress)}&size=1`,
+          isKakaoSearchResponse,
           {
             headers: {
               Authorization: `KakaoAK ${apiKey}`,
@@ -83,24 +80,34 @@ export function HomePage() {
           },
         )
 
-        if (response.ok) {
-          const data = await response.json()
-          if (data.documents && data.documents.length > 0) {
-            const doc = data.documents[0]
-            lat = parseFloat(doc.y)
-            lon = parseFloat(doc.x)
-          }
+        if (data.documents && data.documents.length > 0) {
+          const doc = data.documents[0]
+          lat = parseFloat(doc.y)
+          lon = parseFloat(doc.x)
+        } else {
+          throw new Error('해당 주소의 좌표를 찾을 수 없습니다.')
         }
       } catch (err) {
         console.error('좌표 가져오기 실패:', err)
-        // 좌표를 가져오지 못해도 계속 진행 (기본값 사용)
+        setIsGettingCoordinates(false)
+        alert(
+          err instanceof Error ? err.message : '좌표를 가져오는데 실패했습니다. 다시 시도해주세요.',
+        )
+        return
+      } finally {
+        setIsGettingCoordinates(false)
       }
+    }
+
+    // 유효한 좌표인지 확인
+    if (Number.isNaN(lat) || Number.isNaN(lon) || lat === 0 || lon === 0) {
+      alert('유효한 좌표 정보가 없습니다. 다시 검색해주세요.')
+      return
     }
 
     // 다이나믹 라우트로 이동: /weather/[lat]/[lon]
     router.push(`/weather/${lat.toFixed(6)}/${lon.toFixed(6)}`)
     setSearchValue('')
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     clearResults()
   }
 
@@ -111,7 +118,6 @@ export function HomePage() {
         searchContainerRef.current &&
         !searchContainerRef.current.contains(event.target as Node)
       ) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
         clearResults()
       }
     }
@@ -132,18 +138,23 @@ export function HomePage() {
             placeholder="지역을 검색하세요 (예: 서울특별시, 종로구, 청운동)"
             onSearchClick={handleSearch}
           />
-          {/* eslint-disable-next-line @typescript-eslint/no-unsafe-member-access */}
-          {(searchResults.length > 0 || searchLoading) && (
+          {(searchResults.length > 0 || searchLoading || isGettingCoordinates) && (
             <div className="absolute top-full left-0 right-0 z-50 mt-2">
-              {/* eslint-disable-next-line @typescript-eslint/no-unsafe-assignment */}
-              <SearchResults
-                results={searchResults}
-                onSelect={handleSelectLocation}
-                isLoading={searchLoading}
-              />
+              {isGettingCoordinates ? (
+                <div className="mt-2 rounded-2xl border border-gray-100 bg-white p-4 shadow-lg dark:border-gray-700 dark:bg-gray-800">
+                  <div className="text-center text-sm text-gray-500 dark:text-gray-400">
+                    좌표 정보를 가져오는 중...
+                  </div>
+                </div>
+              ) : (
+                <SearchResults
+                  results={searchResults}
+                  onSelect={handleSelectLocation}
+                  isLoading={searchLoading}
+                />
+              )}
             </div>
           )}
-          {/* eslint-disable-next-line @typescript-eslint/no-unsafe-assignment */}
           {searchError && (
             <div className="mt-2 text-center text-sm text-red-500 dark:text-red-400">
               {searchError}
@@ -172,29 +183,29 @@ export function HomePage() {
                       <CloudIcon size={20} />
                       현재 날씨
                     </h2>
-                    {(weather as WeatherData).baseTime && (
+                    {weather.baseTime && (
                       <span className="text-xs text-gray-500 dark:text-gray-400">
-                        업데이트: {(weather as WeatherData).baseTime}
+                        업데이트: {weather.baseTime}
                       </span>
                     )}
                   </div>
-                  <WeatherCard weather={weather as WeatherData} address={address.fullAddress} />
+                  <WeatherCard weather={weather} address={address.fullAddress} />
                 </div>
 
-                {(weather as WeatherData).hourly && (
+                {weather.hourly && (
                   <div>
                     <div className="mb-4 flex items-center gap-4">
                       <h2 className="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2">
                         <ClockIcon size={20} />
                         시간대별 날씨
                       </h2>
-                      {(weather as WeatherData).baseTime && (
+                      {weather.baseTime && (
                         <span className="text-xs text-gray-500 dark:text-gray-400">
-                          업데이트: {(weather as WeatherData).baseTime}
+                          업데이트: {weather.baseTime}
                         </span>
                       )}
                     </div>
-                    <HourlyWeatherCard hourly={(weather as WeatherData).hourly} />
+                    <HourlyWeatherCard hourly={weather.hourly} />
                   </div>
                 )}
               </>

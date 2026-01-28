@@ -2,39 +2,21 @@
 
 import { useState, useCallback } from 'react'
 import { apiClient } from '@/shared/api'
+import type { KakaoRegionCodeResponse } from '@/shared/types/kakao'
+import { isKakaoRegionCodeResponse } from '@/shared/types/guards'
 
-interface Address {
+export interface Address {
   fullAddress: string
   sido: string
   sigungu: string
   dong?: string
 }
 
-interface UseReverseGeocodingReturn {
+export interface UseReverseGeocodingReturn {
   address: Address | null
   error: string | null
   isLoading: boolean
   getAddressFromCoordinates: (latitude: number, longitude: number) => Promise<void>
-}
-
-// 카카오 API 응답 타입 (coord2regioncode)
-interface KakaoRegionDocument {
-  region_type: 'B' | 'H' // B: 법정동, H: 행정동
-  address_name: string
-  region_1depth_name: string
-  region_2depth_name: string
-  region_3depth_name: string
-  region_4depth_name: string
-  code: string // 행정구역 코드
-  x: number // 경도
-  y: number // 위도
-}
-
-interface KakaoRegionCodeResponse {
-  documents: KakaoRegionDocument[]
-  meta: {
-    total_count: number
-  }
 }
 
 export function useReverseGeocoding(): UseReverseGeocodingReturn {
@@ -70,7 +52,14 @@ export function useReverseGeocoding(): UseReverseGeocodingReturn {
         },
       )
 
-      const documents = response.data.documents
+      // 타입 가드로 검증 (axios는 response.data에 실제 데이터가 있음)
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      const responseData = response.data
+      if (!isKakaoRegionCodeResponse(responseData)) {
+        throw new Error('카카오 API 응답 형식이 올바르지 않습니다.')
+      }
+
+      const documents = responseData.documents
 
       if (documents && documents.length > 0) {
         // 행정동(H) 우선, 없으면 법정동(B) 사용

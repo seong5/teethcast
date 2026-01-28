@@ -3,7 +3,7 @@
 import WeatherIcon, { WindIcon, HumidityIcon } from '@/shared/ui/WeatherIcon'
 import type { WeatherData } from '@/shared/lib/useWeather'
 
-interface WeatherCardProps {
+export interface WeatherCardProps {
   weather: WeatherData
   address?: string
 }
@@ -32,7 +32,7 @@ export default function WeatherCard({ weather, address }: WeatherCardProps) {
                 />
               </div>
               <div className="text-5xl font-extrabold text-gray-800 dark:text-white tracking-tight relative">
-                {weather.temperature}°
+                {Math.round(weather.temperature * 10) / 10}°
               </div>
             </div>
 
@@ -47,7 +47,7 @@ export default function WeatherCard({ weather, address }: WeatherCardProps) {
                 최저기온
               </span>
               <span className="text-xl font-bold text-blue-500 dark:text-blue-400">
-                {weather.minTemp}°
+                {Math.round(weather.minTemp * 10) / 10}°
               </span>
             </div>
             <div className="bg-white/60 dark:bg-gray-800/50 rounded-2xl p-4 flex flex-col items-center justify-center backdrop-blur-sm shadow-sm">
@@ -55,7 +55,7 @@ export default function WeatherCard({ weather, address }: WeatherCardProps) {
                 최고기온
               </span>
               <span className="text-xl font-bold text-red-500 dark:text-red-400">
-                {weather.maxTemp}°
+                {Math.round(weather.maxTemp * 10) / 10}°
               </span>
             </div>
             <div className="bg-white/60 dark:bg-gray-800/50 rounded-2xl p-4 flex flex-row items-center justify-between backdrop-blur-sm shadow-sm">
