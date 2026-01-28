@@ -120,7 +120,12 @@ export default function WeatherDetailPage() {
                       )}
                     </div>
                     <div className="flex-1">
-                      <WeatherCard weather={weather} address={address.fullAddress} />
+                      <WeatherCard
+                        weather={weather}
+                        address={address.fullAddress}
+                        latitude={lat}
+                        longitude={lon}
+                      />
                     </div>
                   </div>
 

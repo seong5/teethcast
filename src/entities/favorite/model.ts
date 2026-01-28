@@ -1,6 +1,4 @@
-/**
- * 즐겨찾기 엔티티 모델
- */
+/* 즐겨찾기 엔티티 모델 */
 
 export interface FavoriteLocation {
   id: string // 고유 ID (lat-lon 기반)

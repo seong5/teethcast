@@ -192,7 +192,12 @@ export function HomePage() {
                       )}
                     </div>
                     <div className="flex-1">
-                      <WeatherCard weather={weather} address={address.fullAddress} />
+                      <WeatherCard
+                        weather={weather}
+                        address={address.fullAddress}
+                        latitude={position?.latitude}
+                        longitude={position?.longitude}
+                      />
                     </div>
                   </div>
 
