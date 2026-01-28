@@ -5,15 +5,21 @@ import type { HourlyWeather } from '@/shared/lib/useWeather'
 
 interface HourlyWeatherProps {
   hourly: HourlyWeather[]
+  baseTime?: string
 }
 
-export default function HourlyWeatherCard({ hourly }: HourlyWeatherProps) {
+export default function HourlyWeatherCard({ hourly, baseTime }: HourlyWeatherProps) {
   if (!hourly || hourly.length === 0) {
     return null
   }
 
   return (
     <div className="w-full bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-xl border border-gray-100 dark:border-gray-700">
+      {baseTime && (
+        <div className="text-xs text-gray-500 dark:text-gray-400 mb-4 text-center">
+          업데이트: {baseTime}
+        </div>
+      )}
       <div className="relative">
         <div className="overflow-x-auto scrollbar-hide">
           <div className="flex items-center gap-3 w-max px-1 mx-auto">

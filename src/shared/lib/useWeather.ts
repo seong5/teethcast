@@ -22,6 +22,7 @@ export interface WeatherData {
   minTemp: number // 최저기온
   maxTemp: number // 최고기온
   hourly: HourlyWeather[] // 시간대별 날씨 (6시간)
+  baseTime?: string // 업데이트 기준 시간 (예: "2026-01-28 14:00")
 }
 
 export interface UseWeatherReturn {
@@ -408,6 +409,11 @@ export function useWeather(): UseWeatherReturn {
           })
         }
 
+        // 업데이트 기준 시간 포맷팅
+        const baseTimeFormatted = dayjs(
+          `${ultraBaseDate} ${ultraBaseTime.substring(0, 2)}:${ultraBaseTime.substring(2, 4)}`,
+        ).format('YYYY-MM-DD HH:mm')
+
         const weatherData = {
           temperature,
           humidity,
@@ -417,6 +423,7 @@ export function useWeather(): UseWeatherReturn {
           minTemp,
           maxTemp,
           hourly: hourlyWeather,
+          baseTime: baseTimeFormatted,
         }
 
         setWeather(weatherData)

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { SearchBar } from '@/shared/ui'
-import { ClockIcon } from '@/shared/ui/WeatherIcon'
+import { ClockIcon, CloudIcon } from '@/shared/ui/WeatherIcon'
 import WeatherCard from '@/widgets/WeatherCard'
 import HourlyWeatherCard from '@/widgets/HourlyWeather'
 import { useGeolocation, useReverseGeocoding, useWeather } from '@/shared/lib'
@@ -65,31 +65,33 @@ export function HomePage() {
             {weather !== null && (
               <>
                 <div>
-                  <h2 className="text-lg font-bold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
-                    <svg
-                      className="w-5 h-5 text-blue-500"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"
-                      />
-                    </svg>
-                    현재 날씨
-                  </h2>
+                  <div className="mb-4 flex items-center gap-4">
+                    <h2 className="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2">
+                      <CloudIcon size={20} />
+                      현재 날씨
+                    </h2>
+                    {(weather as WeatherData).baseTime && (
+                      <span className="text-xs text-gray-500 dark:text-gray-400">
+                        업데이트: {(weather as WeatherData).baseTime}
+                      </span>
+                    )}
+                  </div>
                   <WeatherCard weather={weather as WeatherData} address={address.fullAddress} />
                 </div>
 
                 {(weather as WeatherData).hourly && (
                   <div>
-                    <h2 className="text-lg font-bold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
-                      <ClockIcon size={20} />
-                      시간대별 날씨
-                    </h2>
+                    <div className="mb-4 flex items-center gap-4">
+                      <h2 className="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2">
+                        <ClockIcon size={20} />
+                        시간대별 날씨
+                      </h2>
+                      {(weather as WeatherData).baseTime && (
+                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                          업데이트: {(weather as WeatherData).baseTime}
+                        </span>
+                      )}
+                    </div>
                     <HourlyWeatherCard hourly={(weather as WeatherData).hourly} />
                   </div>
                 )}

@@ -141,3 +141,22 @@ export function ClockIcon({
 
   return <Clock {...iconProps} />
 }
+
+// 구름 아이콘
+export function CloudIcon({
+  size = 20,
+  className = '',
+  'aria-label': ariaLabel,
+}: {
+  size?: number
+  className?: string
+  'aria-label'?: string
+}) {
+  const iconProps: LucideProps = {
+    size,
+    className: `text-blue-500 ${className}`.trim(),
+    ...(ariaLabel ? { 'aria-label': ariaLabel } : {}),
+  }
+
+  return <Cloud {...iconProps} />
+}
