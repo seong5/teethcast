@@ -8,12 +8,15 @@ import WeatherCard from '@/widgets/WeatherCard'
 import HourlyWeatherCard from '@/widgets/HourlyWeather'
 import DailyWeatherCard from '@/widgets/DailyWeather'
 import SearchResults from '@/features/search/SearchResults'
-import { useGeolocation, useReverseGeocoding, useWeather, useLocationSearch } from '@/shared/lib'
+import {
+  useGeolocation,
+  useReverseGeocoding,
+  useWeather,
+  useLocationSearch,
+  useKakaoSearch,
+} from '@/shared/lib'
 import type { UseLocationSearchReturn } from '@/shared/lib'
 import type { LocationSearchResult } from '@/shared/lib/useLocationSearch'
-import type { KakaoSearchResponse } from '@/shared/types/kakao'
-import { fetchAPIWithGuard } from '@/shared/api'
-import { isKakaoSearchResponse } from '@/shared/types/guards'
 
 export function HomePage() {
   const router = useRouter()
@@ -34,6 +37,11 @@ export function HomePage() {
     search: searchLocation,
     clearResults,
   }: UseLocationSearchReturn = useLocationSearch()
+  const {
+    isLoading: isGettingCoordinates,
+    error: kakaoSearchError,
+    searchCoordinates,
+  } = useKakaoSearch()
 
   useEffect(() => {
     // 페이지 로드 시 자동으로 현재 위치 감지
@@ -55,48 +63,26 @@ export function HomePage() {
     }
   }
 
-  const [isGettingCoordinates, setIsGettingCoordinates] = useState(false)
-
   const handleSelectLocation = async (result: LocationSearchResult) => {
     let lat = result.y
     let lon = result.x
 
     // 좌표가 없으면 카카오 API로 검색하여 좌표 가져오기
     if (lat === 0 && lon === 0) {
-      setIsGettingCoordinates(true)
       try {
-        const apiKey = process.env.NEXT_PUBLIC_KAKAO_REST_API_KEY
-        if (!apiKey) {
-          throw new Error('카카오 API 키가 설정되지 않았습니다.')
+        const coordinates = await searchCoordinates(result.formattedAddress)
+        if (!coordinates) {
+          alert('해당 주소의 좌표를 찾을 수 없습니다.')
+          return
         }
-
-        // 카카오 키워드 검색 API로 주소 검색 (타입 가드 사용)
-        const data = await fetchAPIWithGuard<KakaoSearchResponse>(
-          `https://dapi.kakao.com/v2/local/search/keyword.json?query=${encodeURIComponent(result.formattedAddress)}&size=1`,
-          isKakaoSearchResponse,
-          {
-            headers: {
-              Authorization: `KakaoAK ${apiKey}`,
-            },
-          },
-        )
-
-        if (data.documents && data.documents.length > 0) {
-          const doc = data.documents[0]
-          lat = parseFloat(doc.y)
-          lon = parseFloat(doc.x)
-        } else {
-          throw new Error('해당 주소의 좌표를 찾을 수 없습니다.')
-        }
+        lat = coordinates.latitude
+        lon = coordinates.longitude
       } catch (err) {
         console.error('좌표 가져오기 실패:', err)
-        setIsGettingCoordinates(false)
         alert(
           err instanceof Error ? err.message : '좌표를 가져오는데 실패했습니다. 다시 시도해주세요.',
         )
         return
-      } finally {
-        setIsGettingCoordinates(false)
       }
     }
 
@@ -156,9 +142,9 @@ export function HomePage() {
               )}
             </div>
           )}
-          {searchError && (
+          {(searchError || kakaoSearchError) && (
             <div className="mt-2 text-center text-sm text-red-500 dark:text-red-400">
-              {searchError}
+              {searchError || kakaoSearchError}
             </div>
           )}
         </div>
