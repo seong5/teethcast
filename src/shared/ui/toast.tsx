@@ -3,11 +3,11 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { CheckCircle2, Info, Star, X } from 'lucide-react'
+import { CheckCircle2, Star, X } from 'lucide-react'
 import hotToast from 'react-hot-toast'
 
 interface ToastItemProps {
-  type: 'success' | 'message' | 'favorite'
+  type: 'success' | 'favorite'
   content: string
   onClose: () => void
 }
@@ -48,11 +48,6 @@ const ToastItem = ({ type, content, onClose }: ToastItemProps) => {
       icon: <CheckCircle2 className="h-6 w-6 text-emerald-500" />,
       line: 'bg-emerald-500',
     },
-    message: {
-      container: 'bg-white/90 dark:bg-slate-800/90 border-slate-100 dark:border-slate-700',
-      icon: <Info className="h-6 w-6 text-blue-500" />,
-      line: 'bg-blue-500',
-    },
     favorite: {
       container: 'bg-white/90 dark:bg-slate-800/90 border-yellow-100 dark:border-yellow-900',
       icon: <Star className="h-6 w-6 text-amber-500 fill-yellow-500" />,
@@ -60,7 +55,7 @@ const ToastItem = ({ type, content, onClose }: ToastItemProps) => {
     },
   }
 
-  const style = variants[type] || variants.message
+  const style = variants[type] ?? variants.success
 
   return (
     <div className={`${baseClasses} ${style.container}`}>
@@ -71,7 +66,7 @@ const ToastItem = ({ type, content, onClose }: ToastItemProps) => {
         <div className="flex-1 pt-0.5">
           {type === 'favorite' ? (
             <div className="flex flex-col gap-2">
-              <span className="text-slate-800 dark:text-slate-100 text-[12px]">
+              <span className="text-slate-800 dark:text-slate-100 text-[13px]">
                 &quot;{content}&quot;을(를) 즐겨찾기에 추가했습니다.
               </span>
               <Link
@@ -105,7 +100,6 @@ const ToastItem = ({ type, content, onClose }: ToastItemProps) => {
 
 export interface ShowToastApi {
   success: (message: string) => void
-  message: (message: string) => void
   favoriteAdded: (name: string) => void
 }
 
@@ -116,21 +110,6 @@ export const showToast: ShowToastApi = {
       (t) => (
         <ToastItem
           type="success"
-          content={message}
-          onClose={() => {
-            hotToast.dismiss(t.id)
-          }}
-        />
-      ),
-      { duration: 3000 },
-    )
-  },
-  message: (message: string) => {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-    return hotToast.custom(
-      (t) => (
-        <ToastItem
-          type="message"
           content={message}
           onClose={() => {
             hotToast.dismiss(t.id)

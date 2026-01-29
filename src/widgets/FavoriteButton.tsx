@@ -50,7 +50,7 @@ export default function FavoriteButton({
 
     if (isFav) {
       removeFavorite(favoriteId)
-      showToast.message('즐겨찾기에서 제거했습니다.')
+      showToast.success('즐겨찾기에서 제거했습니다.')
     } else {
       addFavorite(
         {
