@@ -16,7 +16,7 @@ import {
   useKakaoSearch,
 } from '@/shared/lib'
 import type { UseLocationSearchReturn } from '@/shared/lib'
-import type { LocationSearchResult } from '@/shared/lib/useLocationSearch'
+import type { LocationSearchResult } from '@/shared/lib'
 
 export function HomePage() {
   const router = useRouter()

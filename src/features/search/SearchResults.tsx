@@ -1,6 +1,6 @@
 'use client'
 
-import type { LocationSearchResult } from '@/shared/lib/useLocationSearch'
+import type { LocationSearchResult } from '@/shared/lib'
 
 export interface SearchResultsProps {
   results: LocationSearchResult[]

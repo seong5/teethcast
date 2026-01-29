@@ -1,7 +1,7 @@
 'use client'
 
 import WeatherIcon, { WindIcon, HumidityIcon } from '@/shared/ui/WeatherIcon'
-import type { WeatherData } from '@/shared/lib/useWeather'
+import type { WeatherData } from '@/shared/lib'
 import FavoriteButton from './FavoriteButton'
 
 export interface WeatherCardProps {

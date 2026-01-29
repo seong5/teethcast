@@ -1,7 +1,7 @@
 /* 타입 가드 함수들 */
 
 import type { KakaoSearchResponse, KakaoRegionCodeResponse } from './kakao'
-import type { HierarchicalRegions } from '@/shared/lib/regionSearch'
+import type { HierarchicalRegions } from '@/shared/lib'
 
 /* 카카오 검색 API 응답 타입 가드 */
 export function isKakaoSearchResponse(data: unknown): data is KakaoSearchResponse {

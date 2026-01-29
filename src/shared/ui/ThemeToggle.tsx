@@ -1,6 +1,6 @@
 'use client';
 
-import { useTheme } from '@/shared/lib/useTheme';
+import { useTheme } from '@/shared/lib';
 
 export default function ThemeToggle() {
   const { theme, toggleTheme, mounted } = useTheme();

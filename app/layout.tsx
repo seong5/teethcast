@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import Navbar from "@/widgets/Navbar";
+import NavBar from "@/shared/NavBar";
 import { Toaster } from "@/shared/ui";
 import QueryProvider from "@/shared/ui/providers/QueryProvider";
 
@@ -18,7 +18,7 @@ export default function RootLayout({
     <html lang="ko">
       <body>
         <QueryProvider>
-          <Navbar />
+          <NavBar />
           {children}
           <Toaster />
         </QueryProvider>

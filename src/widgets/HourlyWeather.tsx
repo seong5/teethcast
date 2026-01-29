@@ -1,7 +1,7 @@
 'use client'
 
 import WeatherIcon from '@/shared/ui/WeatherIcon'
-import type { HourlyWeather } from '@/shared/lib/useWeather'
+import type { HourlyWeather } from '@/shared/lib'
 
 export interface HourlyWeatherCardProps {
   hourly: HourlyWeather[]
