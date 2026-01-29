@@ -554,7 +554,15 @@ export function useWeather(): UseWeatherReturn {
     async (latitude: number, longitude: number) => {
       const queryKey = ['weather', latitude, longitude]
 
-      // queryClient.fetchQuery를 사용하여 쿼리 실행 (캐시 확인 포함)
+      // 캐시 우선 확인: 캐시에 데이터가 있으면 API 호출 없이 사용
+      const cachedData = queryClient.getQueryData<WeatherData>(queryKey)
+      if (cachedData) {
+        // 캐시된 데이터가 있으면 좌표만 설정하여 useQuery가 캐시를 사용하도록 함
+        setCoordinates({ lat: latitude, lon: longitude })
+        return
+      }
+
+      // 캐시에 데이터가 없을 때만 API 호출
       try {
         await queryClient.fetchQuery({
           queryKey,
