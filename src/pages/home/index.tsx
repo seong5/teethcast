@@ -33,10 +33,14 @@ export function HomePage() {
   } = useReverseGeocoding()
   const { weather, error: weatherError, isLoading: weatherLoading, getWeather } = useWeather()
 
-  const showSkeleton = useMinimumLoadingState(
-    isLoading || addressLoading || weatherLoading,
-    SKELETON_MIN_MS,
-  )
+  // 위치는 있지만 주소/날씨가 아직 없을 때도 스켈레톤 유지 (깜빡임 방지)
+  const isPending =
+    isLoading ||
+    addressLoading ||
+    weatherLoading ||
+    (position != null && (address == null || weather === null))
+
+  const showSkeleton = useMinimumLoadingState(isPending, SKELETON_MIN_MS)
   
   // 검색 기능
   const {
