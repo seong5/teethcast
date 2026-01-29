@@ -60,16 +60,21 @@ export default function FavoriteButton({
       const idToRemove =
         idOverride != null
           ? favoriteId
-          : favorites.find((fav) => fav.id === favoriteId)?.id ??
+          : (favorites.find((fav) => fav.id === favoriteId)?.id ??
             favorites.find(
               (fav) =>
                 generateFavoriteIdCoarse(fav.latitude, fav.longitude) ===
                 generateFavoriteIdCoarse(latitude, longitude),
             )?.id ??
-            favoriteId
+            favoriteId)
       removeFavorite(idToRemove)
       showToast.success('즐겨찾기에서 제거했습니다.')
     } else {
+      if (favorites.length >= 6) {
+        showToast.error('즐겨찾기는 최대 6개까지 추가할 수 있습니다.')
+        return
+      }
+
       addFavorite(
         {
           name,

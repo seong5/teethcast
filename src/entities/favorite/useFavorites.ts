@@ -4,6 +4,9 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import type { FavoriteLocation } from './model'
 import { roundTo6Decimals, generateFavoriteId } from './coordinates'
+import { showToast } from '@/shared/ui/toast'
+
+const MAX_FAVORITES = 6
 
 interface FavoritesStore {
   favorites: FavoriteLocation[]
@@ -29,12 +32,19 @@ export const useFavoritesStore = create<FavoritesStore>()(
       },
 
       addFavorite: (location, customId) => {
+        const currentFavorites = get().favorites
+
+        if (currentFavorites.length >= MAX_FAVORITES) {
+          showToast.error('즐겨찾기는 최대 6개까지 추가할 수 있습니다.')
+          return
+        }
+
         const roundedLat = roundTo6Decimals(location.latitude)
         const roundedLon = roundTo6Decimals(location.longitude)
         const id = customId ?? generateFavoriteId(roundedLat, roundedLon)
 
         // 이미 같은 ID의 즐겨찾기가 있는지 확인
-        const exists = get().favorites.some((fav) => fav.id === id)
+        const exists = currentFavorites.some((fav) => fav.id === id)
         if (exists) {
           return
         }

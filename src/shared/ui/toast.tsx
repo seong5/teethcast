@@ -3,11 +3,11 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { CheckCircle2, Star, X } from 'lucide-react'
+import { AlertCircle, CheckCircle2, Star, X } from 'lucide-react'
 import hotToast from 'react-hot-toast'
 
 interface ToastItemProps {
-  type: 'success' | 'favorite'
+  type: 'success' | 'favorite' | 'error'
   content: string
   onClose: () => void
 }
@@ -53,6 +53,11 @@ const ToastItem = ({ type, content, onClose }: ToastItemProps) => {
       icon: <Star className="h-6 w-6 text-amber-500 fill-yellow-500" />,
       line: 'bg-yellow-500',
     },
+    error: {
+      container: 'bg-white/90 dark:bg-slate-800/90 border-red-200 dark:border-red-900',
+      icon: <AlertCircle className="h-6 w-6 text-red-500" />,
+      line: 'bg-red-500',
+    },
   }
 
   const style = variants[type] ?? variants.success
@@ -80,7 +85,13 @@ const ToastItem = ({ type, content, onClose }: ToastItemProps) => {
               </Link>
             </div>
           ) : (
-            <p className="text-sm font-medium text-slate-700 dark:text-slate-200 leading-relaxed">
+            <p
+              className={`text-sm font-medium leading-relaxed ${
+                type === 'error'
+                  ? 'text-red-700 dark:text-red-300'
+                  : 'text-slate-700 dark:text-slate-200'
+              }`}
+            >
               {content}
             </p>
           )}
@@ -101,6 +112,7 @@ const ToastItem = ({ type, content, onClose }: ToastItemProps) => {
 export interface ShowToastApi {
   success: (message: string) => void
   favoriteAdded: (name: string) => void
+  error: (message: string) => void
 }
 
 export const showToast: ShowToastApi = {
@@ -110,6 +122,21 @@ export const showToast: ShowToastApi = {
       (t) => (
         <ToastItem
           type="success"
+          content={message}
+          onClose={() => {
+            hotToast.dismiss(t.id)
+          }}
+        />
+      ),
+      { duration: 3000 },
+    )
+  },
+  error: (message: string) => {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+    return hotToast.custom(
+      (t) => (
+        <ToastItem
+          type="error"
           content={message}
           onClose={() => {
             hotToast.dismiss(t.id)
