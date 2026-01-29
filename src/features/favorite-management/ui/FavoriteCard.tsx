@@ -8,6 +8,7 @@ import { useWeather } from '@/shared/lib'
 import { useFavoritesStore, roundTo6Decimals } from '@/entities/favorite'
 import type { FavoriteLocation } from '@/entities/favorite'
 import FavoriteButton from './FavoriteButton'
+import FavoriteCardSkeleton from './FavoriteCardSkeleton'
 
 export interface FavoriteCardProps {
   favorite: FavoriteLocation
@@ -49,38 +50,14 @@ export default function FavoriteCard({ favorite }: FavoriteCardProps) {
     setIsEditing(true)
   }
 
-  if (isLoading) {
-    return (
-      <div
-        onClick={handleClick}
-        className="w-full bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-xl border border-gray-100 dark:border-gray-700 cursor-pointer hover:shadow-2xl transition-shadow"
-      >
-        <div className="flex items-center justify-center min-h-[160px]">
-          <div className="text-sm text-gray-500 dark:text-gray-400">날씨 정보를 불러오는 중...</div>
-        </div>
-      </div>
-    )
-  }
-
-  if (!weather) {
-    return (
-      <div
-        onClick={handleClick}
-        className="w-full bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-xl border border-gray-100 dark:border-gray-700 cursor-pointer hover:shadow-2xl transition-shadow"
-      >
-        <div className="flex items-center justify-center min-h-[160px]">
-          <div className="text-sm text-gray-500 dark:text-gray-400">
-            날씨 정보를 불러올 수 없습니다.
-          </div>
-        </div>
-      </div>
-    )
+  if (isLoading || !weather) {
+    return <FavoriteCardSkeleton />
   }
 
   return (
     <div
       onClick={handleClick}
-      className="relative w-full cursor-pointer overflow-hidden rounded-3xl border border-gray-100 bg-white p-4 shadow-xl transition-shadow hover:shadow-2xl dark:border-gray-700 dark:bg-gray-800"
+      className="relative w-full cursor-pointer overflow-hidden rounded-2xl border border-gray-100 bg-white p-3 shadow-xl transition-shadow hover:shadow-2xl dark:border-gray-700 dark:bg-gray-800 md:rounded-3xl md:p-4"
       role="button"
       tabIndex={0}
       onKeyDown={(e) => {
@@ -88,8 +65,8 @@ export default function FavoriteCard({ favorite }: FavoriteCardProps) {
       }}
       aria-label={`${displayName} 날씨 상세로 이동`}
     >
-      <div className="flex flex-col gap-4">
-        <div className="flex items-center gap-2 min-w-0 min-h-12">
+      <div className="flex flex-col gap-3 md:gap-4">
+        <div className="flex items-center gap-2 min-w-0 min-h-10 md:min-h-12">
           <div className="flex items-center gap-2 min-w-0 flex-1">
             {isEditing ? (
               <input
@@ -105,7 +82,7 @@ export default function FavoriteCard({ favorite }: FavoriteCardProps) {
                   }
                 }}
                 onClick={(e) => e.stopPropagation()}
-                className="flex-1 min-w-0 max-w-full text-sm font-medium text-gray-800 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-[#10a6c1]"
+                className="flex-1 min-w-0 max-w-full text-xs font-medium text-gray-800 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-primary md:text-sm"
                 aria-label="별명 입력"
                 autoFocus
               />
@@ -119,7 +96,7 @@ export default function FavoriteCard({ favorite }: FavoriteCardProps) {
                 >
                   <Pencil className="h-4 w-4" />
                 </button>
-                <span className="text-sm font-medium text-gray-600 dark:text-gray-300 line-clamp-2 min-w-0 flex-1">
+                <span className="text-xs font-medium text-gray-600 dark:text-gray-300 line-clamp-2 min-w-0 flex-1 md:text-sm">
                   {displayName}
                 </span>
               </div>
@@ -136,8 +113,8 @@ export default function FavoriteCard({ favorite }: FavoriteCardProps) {
           </div>
         </div>
 
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3 min-w-0">
+        <div className="flex items-center justify-between gap-3 md:gap-4">
+          <div className="flex items-center gap-2 min-w-0 md:gap-3">
             <div className="flex-shrink-0">
               <WeatherIcon
                 sky={weather.sky}
@@ -148,27 +125,27 @@ export default function FavoriteCard({ favorite }: FavoriteCardProps) {
             </div>
 
             <div className="min-w-0">
-              <div className="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">
+              <div className="text-2xl font-extrabold text-gray-900 dark:text-white tracking-tight md:text-3xl">
                 {Math.round(weather.temperature * 10) / 10}°
               </div>
-              <div className="text-sm text-gray-500 dark:text-gray-400 truncate">
+              <div className="text-xs text-gray-500 dark:text-gray-400 truncate md:text-sm">
                 {weather.sky}
                 {weather.precipitation !== '없음' ? ` · ${weather.precipitation}` : ''}
               </div>
             </div>
           </div>
 
-          <div className="flex items-center gap-3 flex-shrink-0">
+          <div className="flex items-center gap-2 flex-shrink-0 md:gap-3">
             <div className="text-right">
               <div className="text-xs font-medium text-gray-500 dark:text-gray-400">최저</div>
-              <div className="text-lg font-bold text-blue-500 dark:text-blue-400">
+              <div className="text-base font-bold text-blue-500 dark:text-blue-400 md:text-lg">
                 {Math.round(weather.minTemp * 10) / 10}°
               </div>
             </div>
             <div className="text-gray-300 dark:text-gray-600">/</div>
             <div className="text-right">
               <div className="text-xs font-medium text-gray-500 dark:text-gray-400">최고</div>
-              <div className="text-lg font-bold text-red-500 dark:text-red-400">
+              <div className="text-base font-bold text-red-500 dark:text-red-400 md:text-lg">
                 {Math.round(weather.maxTemp * 10) / 10}°
               </div>
             </div>

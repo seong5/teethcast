@@ -3,3 +3,5 @@ export { default as Button } from './Button';
 export { default as SearchBar } from './SearchBar';
 export { default as ThemeToggle } from './ThemeToggle';
 export { default as Toaster } from './Toaster';
+export { default as SectionTitleWithUpdate } from './SectionTitleWithUpdate';
+export { default as Skeleton } from './Skeleton';

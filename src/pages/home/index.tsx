@@ -3,9 +3,13 @@
 import { useEffect, useRef } from 'react'
 import { SearchBar } from '@/shared/ui'
 import { ClockIcon, CloudIcon } from '@/shared/ui/WeatherIcon'
+import { SectionTitleWithUpdate } from '@/shared/ui'
 import WeatherCard from '@/widgets/WeatherCard'
 import HourlyWeatherCard from '@/widgets/HourlyWeather'
 import DailyWeatherCard from '@/widgets/DailyWeather'
+import WeatherCardSkeleton from '@/widgets/WeatherCardSkeleton'
+import DailyWeatherSkeleton from '@/widgets/DailyWeatherSkeleton'
+import HourlyWeatherSkeleton from '@/widgets/HourlyWeatherSkeleton'
 import { SearchResults } from '@/features/search'
 import { useSearch } from '@/features/search'
 import { useLocationSelection } from '@/features/location-selection'
@@ -13,7 +17,10 @@ import {
   useGeolocation,
   useReverseGeocoding,
   useWeather,
+  useMinimumLoadingState,
 } from '@/shared/lib'
+
+const SKELETON_MIN_MS = 400
 
 export function HomePage() {
   const searchContainerRef = useRef<HTMLDivElement>(null)
@@ -25,6 +32,11 @@ export function HomePage() {
     getAddressFromCoordinates,
   } = useReverseGeocoding()
   const { weather, error: weatherError, isLoading: weatherLoading, getWeather } = useWeather()
+
+  const showSkeleton = useMinimumLoadingState(
+    isLoading || addressLoading || weatherLoading,
+    SKELETON_MIN_MS,
+  )
   
   // 검색 기능
   const {
@@ -77,8 +89,8 @@ export function HomePage() {
 
   return (
     <main className="flex min-h-screen flex-col items-center px-4 py-8 sm:px-6 sm:py-12 md:px-8 md:py-16 lg:p-10 bg-white dark:bg-gray-900">
-      <div className="z-10 max-w-7xl w-full items-center justify-between font-mono text-sm">
-        <div ref={searchContainerRef} className="w-full max-w-5xl mx-auto mb-8 relative">
+      <div className="z-10 max-w-7xl w-full items-center justify-between font-mono text-xs md:text-sm">
+        <div ref={searchContainerRef} className="w-full max-w-5xl mx-auto mb-6 md:mb-8 relative">
           <SearchBar
             value={searchValue}
             onChange={setSearchValue}
@@ -89,7 +101,7 @@ export function HomePage() {
             <div className="absolute top-full left-0 right-0 z-50 mt-2">
               {isGettingCoordinates ? (
                 <div className="mt-2 rounded-2xl border border-gray-100 bg-white p-4 shadow-lg dark:border-gray-700 dark:bg-gray-800">
-                  <div className="text-center text-sm text-gray-500 dark:text-gray-400">
+                  <div className="text-center text-xs text-gray-500 dark:text-gray-400 md:text-sm">
                     좌표 정보를 가져오는 중...
                   </div>
                 </div>
@@ -103,82 +115,83 @@ export function HomePage() {
             </div>
           )}
           {(searchError || kakaoSearchError) && (
-            <div className="mt-2 text-center text-sm text-red-500 dark:text-red-400">
+            <div className="mt-2 text-center text-xs text-red-500 dark:text-red-400 md:text-sm">
               {searchError || kakaoSearchError}
             </div>
           )}
         </div>
 
-        {(isLoading || addressLoading || weatherLoading) && (
-          <div className="text-center text-sm text-gray-500 dark:text-gray-400 mb-4">
-            현재 위치와 날씨를 확인하는 중...
-          </div>
-        )}
         {(error || addressError || weatherError) && (
-          <div className="text-center text-sm text-red-500 dark:text-red-400 mb-4">
+          <div className="text-center text-xs text-red-500 dark:text-red-400 mb-4 md:text-sm">
             {error || addressError || weatherError}
           </div>
         )}
 
-        {address && (
-          <div className="space-y-6 max-w-5xl mx-auto w-full">
-            {weather !== null && (
-              <>
-                <div className="flex flex-col lg:flex-row lg:items-stretch gap-6">
-                  <div className="flex-1 flex flex-col">
-                    <div className="mb-4 flex items-center gap-4">
-                      <h2 className="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2">
-                        <CloudIcon size={20} />
-                        현재 날씨
-                      </h2>
-                      {weather.baseTime && (
-                        <span className="text-xs text-gray-500 dark:text-gray-400">
-                          업데이트: {weather.baseTime}
-                        </span>
-                      )}
-                    </div>
-                    <div className="flex-1">
-                      <WeatherCard
-                        weather={weather}
-                        address={address.fullAddress}
-                        latitude={position?.latitude}
-                        longitude={position?.longitude}
-                      />
-                    </div>
-                  </div>
-
-                  {weather.daily && weather.daily.length > 0 && (
-                    <div className="flex-1 lg:max-w-md flex flex-col">
-                      <div className="mb-4 flex items-center gap-4">
-                        <h2 className="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2">
-                          <CloudIcon size={20} />
-                          단기 예보
-                        </h2>
-                      </div>
-                      <div className="flex-1">
-                        <DailyWeatherCard daily={weather.daily} />
-                      </div>
-                    </div>
-                  )}
+        {showSkeleton && (
+          <div className="space-y-6 max-w-5xl mx-auto w-full min-h-[720px] md:min-h-[800px]">
+            <div className="flex flex-col lg:flex-row lg:items-stretch gap-4 md:gap-6">
+              <div className="flex-1 flex flex-col">
+                <SectionTitleWithUpdate icon={<CloudIcon size={20} />} title="현재 날씨" />
+                <div className="flex-1">
+                  <WeatherCardSkeleton />
                 </div>
+              </div>
+              <div className="flex-1 lg:max-w-md flex flex-col">
+                <SectionTitleWithUpdate icon={<CloudIcon size={20} />} title="단기 예보" />
+                <div className="flex-1">
+                  <DailyWeatherSkeleton />
+                </div>
+              </div>
+            </div>
+            <div>
+              <SectionTitleWithUpdate icon={<ClockIcon size={20} />} title="시간대별 날씨" />
+              <HourlyWeatherSkeleton />
+            </div>
+          </div>
+        )}
 
-                {weather.hourly && (
-                  <div>
-                    <div className="mb-4 flex items-center gap-4">
-                      <h2 className="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2">
-                        <ClockIcon size={20} />
-                        시간대별 날씨
-                      </h2>
-                      {weather.baseTime && (
-                        <span className="text-xs text-gray-500 dark:text-gray-400">
-                          업데이트: {weather.baseTime}
-                        </span>
-                      )}
-                    </div>
-                    <HourlyWeatherCard hourly={weather.hourly} />
+        {address && weather !== null && !showSkeleton && (
+          <div className="space-y-6 max-w-5xl mx-auto w-full min-h-[720px] md:min-h-[800px]">
+            <div className="flex flex-col lg:flex-row lg:items-stretch gap-4 md:gap-6">
+              <div className="flex-1 flex flex-col">
+                <SectionTitleWithUpdate
+                  icon={<CloudIcon size={20} />}
+                  title="현재 날씨"
+                  updateTime={weather.baseTime}
+                />
+                <div className="flex-1">
+                  <WeatherCard
+                    weather={weather}
+                    address={address.fullAddress}
+                    latitude={position?.latitude}
+                    longitude={position?.longitude}
+                  />
+                </div>
+              </div>
+
+              {weather.daily && weather.daily.length > 0 && (
+                <div className="flex-1 lg:max-w-md flex flex-col">
+                  <SectionTitleWithUpdate
+                    icon={<CloudIcon size={20} />}
+                    title="단기 예보"
+                    updateTime={weather.dailyBaseTime}
+                  />
+                  <div className="flex-1">
+                    <DailyWeatherCard daily={weather.daily} />
                   </div>
-                )}
-              </>
+                </div>
+              )}
+            </div>
+
+            {weather.hourly && (
+              <div>
+                <SectionTitleWithUpdate
+                  icon={<ClockIcon size={20} />}
+                  title="시간대별 날씨"
+                  updateTime={weather.baseTime}
+                />
+                <HourlyWeatherCard hourly={weather.hourly} />
+              </div>
             )}
           </div>
         )}

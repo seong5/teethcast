@@ -30,5 +30,6 @@ export interface WeatherData {
   maxTemp: number // 최고기온
   hourly: HourlyWeather[] // 시간대별 날씨 (6시간)
   daily: DailyWeather[] // 일별 날씨 (3일)
-  baseTime?: string // 업데이트 기준 시간 (예: "2026-01-28 14:00")
+  baseTime?: string // 시간대별(초단기) 업데이트 기준 시간 (예: "2026-01-28 14:00")
+  dailyBaseTime?: string // 단기예보(일별) 업데이트 기준 시간 (예: "2026-01-28 05:00")
 }

@@ -1,6 +1,7 @@
 'use client'
 
 import type { LocationSearchResult } from '@/shared/lib'
+import { SearchResultsSkeleton } from './SearchResultsSkeleton'
 
 export interface SearchResultsProps {
   results: LocationSearchResult[]
@@ -14,11 +15,7 @@ export function SearchResults({
   isLoading = false,
 }: SearchResultsProps) {
   if (isLoading) {
-    return (
-      <div className="mt-2 rounded-2xl border border-gray-100 bg-white p-4 shadow-lg dark:border-gray-700 dark:bg-gray-800">
-        <div className="text-center text-sm text-gray-500 dark:text-gray-400">검색 중...</div>
-      </div>
-    )
+    return <SearchResultsSkeleton />
   }
 
   if (results.length === 0) {
@@ -34,7 +31,7 @@ export function SearchResults({
             <li key={result.id}>
               {isErrorMessage ? (
                 <div className="w-full px-4 py-3 text-left">
-                  <div className="font-medium text-red-500 dark:text-red-400">
+                  <div className="text-xs font-medium text-red-500 dark:text-red-400 md:text-sm">
                     {result.formattedAddress}
                   </div>
                 </div>
@@ -44,7 +41,7 @@ export function SearchResults({
                   onClick={() => onSelect(result)}
                   className="w-full px-4 py-3 text-left transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/50"
                 >
-                  <div className="font-medium text-gray-900 dark:text-white">
+                  <div className="text-xs font-medium text-gray-900 dark:text-white md:text-sm">
                     {result.formattedAddress}
                   </div>
                 </button>

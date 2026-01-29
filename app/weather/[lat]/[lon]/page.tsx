@@ -25,14 +25,14 @@ export default function Page() {
     return (
       <main className="flex min-h-screen flex-col items-center justify-center px-4 py-8 sm:px-6 sm:py-12 md:px-8 md:py-16 lg:p-10 bg-white dark:bg-gray-900">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-800 dark:text-white mb-4">
+          <h1 className="text-xl font-bold text-gray-800 dark:text-white mb-4 md:text-2xl">
             잘못된 위치 정보입니다
           </h1>
-          <p className="text-gray-500 dark:text-gray-400 mb-4">올바른 좌표 정보가 필요합니다.</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-4 md:text-base">올바른 좌표 정보가 필요합니다.</p>
           <button
             type="button"
             onClick={() => router.back()}
-            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+            className="px-4 py-2 text-xs font-medium bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors md:text-sm"
           >
             뒤로가기
           </button>

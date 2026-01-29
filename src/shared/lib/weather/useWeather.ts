@@ -483,9 +483,14 @@ async function fetchWeatherData(latitude: number, longitude: number): Promise<We
     })
   }
 
-  // 업데이트 기준 시간 포맷팅
+  // 업데이트 기준 시간 포맷팅 (초단기 = 시간대별)
   const baseTimeFormatted = dayjs(
     `${ultraBaseDate} ${ultraBaseTime.substring(0, 2)}:${ultraBaseTime.substring(2, 4)}`,
+  ).format('YYYY-MM-DD HH:mm')
+
+  // 단기예보(일별) 업데이트 기준 시간 포맷팅
+  const dailyBaseTimeFormatted = dayjs(
+    `${vilageBaseDate} ${vilageBaseTime.substring(0, 2)}:${vilageBaseTime.substring(2, 4)}`,
   ).format('YYYY-MM-DD HH:mm')
 
   return {
@@ -499,6 +504,7 @@ async function fetchWeatherData(latitude: number, longitude: number): Promise<We
     hourly: hourlyWeather,
     daily: dailyWeather,
     baseTime: baseTimeFormatted,
+    dailyBaseTime: dailyBaseTimeFormatted,
   }
 }
 
