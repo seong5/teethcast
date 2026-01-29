@@ -1,13 +1,15 @@
 'use client'
 
-import { useParams, useRouter } from 'next/navigation'
+import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { WeatherDetailPage } from '@/pages/weather'
 
 export default function Page() {
   const router = useRouter()
   const params = useParams()
+  const searchParams = useSearchParams()
   const lat = params?.lat ? parseFloat(params.lat as string) : NaN
   const lon = params?.lon ? parseFloat(params.lon as string) : NaN
+  const favoriteId = searchParams?.get('favoriteId') ?? undefined
 
   // 좌표가 유효하지 않은 경우
   if (
@@ -40,5 +42,5 @@ export default function Page() {
   }
 
   // 좌표가 유효하면 실제 상세 페이지 컴포넌트 렌더링
-  return <WeatherDetailPage lat={lat} lon={lon} />
+  return <WeatherDetailPage lat={lat} lon={lon} favoriteId={favoriteId} />
 }

@@ -13,9 +13,10 @@ import type { UseWeatherReturn } from '@/shared/lib'
 export interface WeatherDetailPageProps {
   lat: number
   lon: number
+  favoriteId?: string
 }
 
-export function WeatherDetailPage({ lat, lon }: WeatherDetailPageProps) {
+export function WeatherDetailPage({ lat, lon, favoriteId }: WeatherDetailPageProps) {
   const router = useRouter()
 
   const {
@@ -97,6 +98,7 @@ export function WeatherDetailPage({ lat, lon }: WeatherDetailPageProps) {
                         address={address.fullAddress}
                         latitude={lat}
                         longitude={lon}
+                        favoriteIdOverride={favoriteId}
                       />
                     </div>
                   </div>

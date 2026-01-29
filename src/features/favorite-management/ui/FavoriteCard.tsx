@@ -28,7 +28,9 @@ export default function FavoriteCard({ favorite }: FavoriteCardProps) {
 
   const handleClick = () => {
     if (isEditing) return
-    router.push(`/weather/${favorite.latitude.toFixed(6)}/${favorite.longitude.toFixed(6)}`)
+    router.push(
+      `/weather/${favorite.latitude.toFixed(6)}/${favorite.longitude.toFixed(6)}?favoriteId=${encodeURIComponent(favorite.id)}`,
+    )
   }
 
   const handleSaveNickName = () => {
