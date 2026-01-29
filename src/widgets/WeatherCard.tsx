@@ -2,7 +2,7 @@
 
 import WeatherIcon, { WindIcon, HumidityIcon } from '@/shared/ui/WeatherIcon'
 import type { WeatherData } from '@/shared/lib'
-import FavoriteButton from './FavoriteButton'
+import { FavoriteButton } from '@/features/favorite-management'
 
 export interface WeatherCardProps {
   weather: WeatherData

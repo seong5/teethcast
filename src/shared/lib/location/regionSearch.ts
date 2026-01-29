@@ -3,12 +3,7 @@
 import { isHierarchicalRegions } from '@/shared/types/guards'
 import { fetchAPIWithGuard } from '@/shared/api/fetch'
 import { normalizeSidoName } from './formatAddress'
-
-export type HierarchicalRegions = {
-  [sido: string]: {
-    [sigungu: string]: string[]
-  }
-}
+import type { HierarchicalRegions } from '@/shared/types/location'
 
 let regionsCache: HierarchicalRegions | null = null
 

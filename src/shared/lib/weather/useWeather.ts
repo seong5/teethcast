@@ -4,37 +4,9 @@ import { useState, useCallback } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { apiClient } from '@/shared/api'
 import { convertLatLonToGrid } from './convertCoordinates'
+import { QUERY_CONFIG } from '@/shared/config/query'
+import type { WeatherData, HourlyWeather, DailyWeather } from '@/shared/types/weather'
 import dayjs from 'dayjs'
-
-export interface HourlyWeather {
-  time: string // 시간 (예: "14:00")
-  date?: string // 날짜 (예: "01/27")
-  temperature: number // 기온
-  sky: string // 하늘상태
-  precipitation: string // 강수형태
-}
-
-export interface DailyWeather {
-  date: string // 날짜 (예: "2026-01-28")
-  dateLabel: string // 날짜 라벨 (예: "오늘", "내일", "모레", "01/28")
-  minTemp: number // 최저기온
-  maxTemp: number // 최고기온
-  sky: string // 하늘상태 (맑음, 구름많음, 흐림)
-  precipitation: string // 강수형태 (없음, 비, 눈, 비/눈)
-}
-
-export interface WeatherData {
-  temperature: number // 현재 기온
-  humidity: number // 습도
-  sky: string // 하늘상태 (맑음, 구름많음, 흐림)
-  precipitation: string // 강수형태 (없음, 비, 눈, 비/눈)
-  windSpeed: number // 풍속
-  minTemp: number // 최저기온
-  maxTemp: number // 최고기온
-  hourly: HourlyWeather[] // 시간대별 날씨 (6시간)
-  daily: DailyWeather[] // 일별 날씨 (3일)
-  baseTime?: string // 업데이트 기준 시간 (예: "2026-01-28 14:00")
-}
 
 export interface UseWeatherReturn {
   weather: WeatherData | null
@@ -546,8 +518,8 @@ export function useWeather(): UseWeatherReturn {
       return fetchWeatherData(coordinates.lat, coordinates.lon)
     },
     enabled: !!coordinates,
-    staleTime: 1000 * 60 * 10, // 10분간 fresh 상태 유지
-    gcTime: 1000 * 60 * 30, // 30분간 캐시 유지
+    staleTime: QUERY_CONFIG.weather.staleTime,
+    gcTime: QUERY_CONFIG.weather.gcTime,
   })
 
   const getWeather = useCallback(
@@ -567,8 +539,8 @@ export function useWeather(): UseWeatherReturn {
         await queryClient.fetchQuery({
           queryKey,
           queryFn: () => fetchWeatherData(latitude, longitude),
-          staleTime: 1000 * 60 * 10, // 10분간 fresh 상태 유지
-          gcTime: 1000 * 60 * 30, // 30분간 캐시 유지
+          staleTime: QUERY_CONFIG.weather.staleTime,
+          gcTime: QUERY_CONFIG.weather.gcTime,
         })
         // 쿼리 성공 후 좌표 설정 (이렇게 하면 useQuery가 자동으로 캐시된 데이터를 사용)
         setCoordinates({ lat: latitude, lon: longitude })

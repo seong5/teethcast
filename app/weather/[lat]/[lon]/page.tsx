@@ -1,7 +1,7 @@
 'use client'
 
 import { useParams, useRouter } from 'next/navigation'
-import { WeatherDetailPage } from '@/pages/weather/DetailPage'
+import { WeatherDetailPage } from '@/pages/weather'
 
 export default function Page() {
   const router = useRouter()

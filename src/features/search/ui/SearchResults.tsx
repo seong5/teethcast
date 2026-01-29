@@ -8,7 +8,7 @@ export interface SearchResultsProps {
   isLoading?: boolean
 }
 
-export default function SearchResults({
+export function SearchResults({
   results,
   onSelect,
   isLoading = false,

@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { ArrowLeft } from 'lucide-react'
 import { useFavorites } from '@/entities/favorite'
-import FavoriteCard from '@/widgets/FavoriteCard'
+import { FavoriteCard } from '@/features/favorite-management'
 
 export function FavoritesPage() {
   const router = useRouter()

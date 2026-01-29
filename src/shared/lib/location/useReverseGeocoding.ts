@@ -4,6 +4,7 @@ import { useState, useCallback } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import type { KakaoRegionCodeResponse } from '@/shared/types/kakao'
 import { isKakaoRegionCodeResponse } from '@/shared/types/guards'
+import { QUERY_CONFIG } from '@/shared/config/query'
 
 export interface Address {
   fullAddress: string
@@ -96,8 +97,8 @@ export function useReverseGeocoding(): UseReverseGeocodingReturn {
       return parseAddressFromResponse(response)
     },
     enabled: !!coordinates,
-    staleTime: 1000 * 60 * 60, // 1시간간 fresh 상태 유지 (주소는 자주 바뀌지 않음)
-    gcTime: 1000 * 60 * 60 * 24, // 24시간간 캐시 유지
+    staleTime: QUERY_CONFIG.reverseGeocoding.staleTime,
+    gcTime: QUERY_CONFIG.reverseGeocoding.gcTime,
   })
 
   const getAddressFromCoordinates = useCallback(
@@ -111,8 +112,8 @@ export function useReverseGeocoding(): UseReverseGeocodingReturn {
             const response = await fetchReverseGeocoding(latitude, longitude)
             return parseAddressFromResponse(response)
           },
-          staleTime: 1000 * 60 * 60,
-          gcTime: 1000 * 60 * 60 * 24,
+          staleTime: QUERY_CONFIG.reverseGeocoding.staleTime,
+          gcTime: QUERY_CONFIG.reverseGeocoding.gcTime,
         })
         setCoordinates({ lat: latitude, lon: longitude })
       } catch {

@@ -4,6 +4,7 @@ import { useState, useCallback } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import type { KakaoSearchResponse } from '@/shared/types/kakao'
 import { isKakaoSearchResponse } from '@/shared/types/guards'
+import { QUERY_CONFIG } from '@/shared/config/query'
 
 export interface Coordinates {
   latitude: number
@@ -71,8 +72,8 @@ export function useKakaoSearch(): UseKakaoSearchReturn {
       return extractCoordinates(response)
     },
     enabled: !!query,
-    staleTime: 1000 * 60 * 60, // 1시간간 fresh 상태 유지 (좌표는 자주 바뀌지 않음)
-    gcTime: 1000 * 60 * 60 * 24, // 24시간간 캐시 유지
+    staleTime: QUERY_CONFIG.kakaoSearch.staleTime,
+    gcTime: QUERY_CONFIG.kakaoSearch.gcTime,
   })
 
   const searchCoordinates = useCallback(
@@ -87,8 +88,8 @@ export function useKakaoSearch(): UseKakaoSearchReturn {
             const response = await fetchKakaoSearch(searchQuery)
             return extractCoordinates(response)
           },
-          staleTime: 1000 * 60 * 60, // 1시간간 fresh 상태 유지
-          gcTime: 1000 * 60 * 60 * 24, // 24시간간 캐시 유지
+          staleTime: QUERY_CONFIG.kakaoSearch.staleTime,
+          gcTime: QUERY_CONFIG.kakaoSearch.gcTime,
         })
         // 쿼리 성공 후 query 설정
         setQuery(searchQuery)

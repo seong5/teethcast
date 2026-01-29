@@ -4,6 +4,7 @@ import { useState, useCallback } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { normalizeSidoName } from './formatAddress'
 import { loadRegions, searchRegions, parseAddress } from './regionSearch'
+import { QUERY_CONFIG } from '@/shared/config/query'
 
 export interface LocationSearchResult {
   id: string
@@ -88,8 +89,8 @@ export function useLocationSearch(): UseLocationSearchReturn {
       return performLocationSearch(searchQuery)
     },
     enabled: !!searchQuery && searchQuery.trim() !== '',
-    staleTime: 1000 * 60 * 5, // 5분간 fresh 상태 유지
-    gcTime: 1000 * 60 * 30, // 30분간 캐시 유지
+    staleTime: QUERY_CONFIG.locationSearch.staleTime,
+    gcTime: QUERY_CONFIG.locationSearch.gcTime,
   })
 
   const search = useCallback(
@@ -107,8 +108,8 @@ export function useLocationSearch(): UseLocationSearchReturn {
         await queryClient.fetchQuery({
           queryKey,
           queryFn: () => performLocationSearch(trimmed),
-          staleTime: 1000 * 60 * 5, // 5분간 fresh 상태 유지
-          gcTime: 1000 * 60 * 30, // 30분간 캐시 유지
+          staleTime: QUERY_CONFIG.locationSearch.staleTime,
+          gcTime: QUERY_CONFIG.locationSearch.gcTime,
         })
         // 쿼리 성공 후 검색어 설정
         setSearchQuery(trimmed)
