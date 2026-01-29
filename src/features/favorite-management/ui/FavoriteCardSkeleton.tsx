@@ -7,8 +7,11 @@ export default function FavoriteCardSkeleton() {
     <div className="relative w-full overflow-hidden rounded-2xl border border-gray-100 bg-white p-3 shadow-xl dark:border-gray-700 dark:bg-gray-800 md:rounded-3xl md:p-4">
       <div className="flex flex-col gap-3 md:gap-4">
         <div className="flex items-center gap-2 min-w-0 min-h-10 md:min-h-12">
-          <Skeleton variant="bar" className="h-4 flex-1 min-w-0 max-w-[180px] md:h-4" />
-          <Skeleton variant="circle" className="h-7 w-7" />
+          <div className="flex items-center gap-1.5 min-w-0 flex-1">
+            <Skeleton variant="circle" className="h-4 w-4 shrink-0" />
+            <Skeleton variant="bar" className="h-4 flex-1 min-w-0 max-w-[180px] md:h-4" />
+          </div>
+          <Skeleton variant="circle" className="h-7 w-7 shrink-0" />
         </div>
         <div className="flex items-center justify-between gap-3 md:gap-4">
           <div className="flex items-center gap-2 min-w-0 md:gap-3">

@@ -18,7 +18,7 @@ interface UseGeolocationReturn {
 export function useGeolocation(): UseGeolocationReturn {
   const [position, setPosition] = useState<Position | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const getCurrentPosition = useCallback(() => {
     if (!navigator.geolocation) {
