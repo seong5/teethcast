@@ -3,10 +3,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import type { FavoriteLocation } from './model'
-import {
-  roundTo6Decimals,
-  generateFavoriteId,
-} from './lib/coordinates'
+import { roundTo6Decimals, generateFavoriteId } from './coordinates'
 
 interface FavoritesStore {
   favorites: FavoriteLocation[]
@@ -31,12 +28,6 @@ export const useFavoritesStore = create<FavoritesStore>()(
         set({ _hasHydrated: hasHydrated })
       },
 
-      /**
-       * 즐겨찾기 추가
-       * 좌표는 소수 6자리로 반올림해 저장·ID와 통일
-       * @param location 즐겨찾기할 위치 정보
-       * @param customId 커스텀 ID (없으면 좌표 기반 ID 사용)
-       */
       addFavorite: (location, customId) => {
         const roundedLat = roundTo6Decimals(location.latitude)
         const roundedLon = roundTo6Decimals(location.longitude)
@@ -61,21 +52,12 @@ export const useFavoritesStore = create<FavoritesStore>()(
         }))
       },
 
-      /**
-       * 즐겨찾기 제거
-       * @param id 즐겨찾기 ID
-       */
       removeFavorite: (id) => {
         set((state) => ({
           favorites: state.favorites.filter((fav) => fav.id !== id),
         }))
       },
 
-      /**
-       * 즐겨찾기 별칭(닉네임) 변경
-       * @param id 즐겨찾기 ID
-       * @param nickName 새 별칭
-       */
       updateFavoriteNickName: (id, nickName) => {
         const trimmed = nickName.trim()
         set((state) => ({
@@ -85,23 +67,11 @@ export const useFavoritesStore = create<FavoritesStore>()(
         }))
       },
 
-      /**
-       * 즐겨찾기 여부 확인
-       * @param lat 위도
-       * @param lon 경도
-       * @returns 즐겨찾기 여부
-       */
       isFavorite: (lat, lon) => {
         const id = generateFavoriteId(lat, lon)
         return get().favorites.some((fav) => fav.id === id)
       },
 
-      /**
-       * 좌표로 즐겨찾기 ID 가져오기
-       * @param lat 위도
-       * @param lon 경도
-       * @returns 즐겨찾기 ID
-       */
       getFavoriteId: (lat, lon) => {
         return generateFavoriteId(lat, lon)
       },

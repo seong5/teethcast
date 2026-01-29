@@ -7,4 +7,4 @@ export {
   roundTo5Decimals,
   generateFavoriteId,
   generateFavoriteIdCoarse,
-} from './lib/coordinates'
+} from './coordinates'
