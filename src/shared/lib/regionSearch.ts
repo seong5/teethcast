@@ -31,11 +31,6 @@ export async function loadRegions(): Promise<HierarchicalRegions> {
   }
 }
 
-/**
- * 계층 구조에서 검색 결과를 평면 주소 배열로 변환
- * @param results 검색 결과 배열 [{sido, sigungu, dong?}]
- * @returns 주소 문자열 배열 (예: ["서울특별시 종로구 청운동"])
- */
 function formatSearchResults(
   results: Array<{ sido: string; sigungu: string; dong?: string }>,
 ): string[] {
@@ -46,12 +41,6 @@ function formatSearchResults(
   })
 }
 
-/**
- * 계층 구조 데이터에서 검색 수행
- * @param query 검색어
- * @param regions 계층 구조 행정구역 데이터
- * @returns 검색 결과 배열 (주소 문자열)
- */
 export function searchRegions(query: string, regions: HierarchicalRegions): string[] {
   const trimmed = query.trim()
   if (!trimmed || Object.keys(regions).length === 0) return []
@@ -86,8 +75,6 @@ export function searchRegions(query: string, regions: HierarchicalRegions): stri
     }
   } else if (parts.length === 2) {
     const [first, second] = parts
-
-    // 첫 번째 시도: sido + sigungu로 검색
     const normalizedSido = normalizeSidoName(first)
     const sidoToTry = normalizedSido || first
 
@@ -96,7 +83,6 @@ export function searchRegions(query: string, regions: HierarchicalRegions): stri
         results.push({ sido: sidoToTry, sigungu: second, dong })
       })
     } else {
-      // 부분 매칭으로 sido + sigungu 검색 시도
       Object.keys(regions).forEach((s) => {
         if (s.toLowerCase().includes(sidoToTry.toLowerCase())) {
           Object.keys(regions[s]).forEach((sg) => {
@@ -110,7 +96,6 @@ export function searchRegions(query: string, regions: HierarchicalRegions): stri
       })
     }
 
-    // 폴백: 첫 번째 시도에서 결과가 없으면 sigungu + dong으로 검색
     if (results.length === 0) {
       Object.keys(regions).forEach((s) => {
         Object.keys(regions[s]).forEach((sg) => {
@@ -184,11 +169,6 @@ export function searchRegions(query: string, regions: HierarchicalRegions): stri
   return formatSearchResults(limitedResults)
 }
 
-/**
- * 주소 문자열을 파싱하여 시/도, 시/군/구, 동/읍/면으로 분리
- * @param address 띄어쓰기 형식 주소 (예: "서울특별시 종로구 청운동")
- * @returns 파싱된 주소 정보
- */
 export function parseAddress(address: string): {
   sido: string
   sigungu: string

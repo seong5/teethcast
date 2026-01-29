@@ -75,23 +75,17 @@ export function useWeather(): UseWeatherReturn {
   const [weather, setWeather] = useState<WeatherData | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
-
-  /* 초단기실황/예보 base_time 계산 매 시간 정각(00분)에 발표 */
   const getUltraSrtBaseTime = useCallback(() => {
     const now = dayjs()
     const currentHour = now.hour()
     const currentMinute = now.minute()
 
-    // 초단기실황은 매 시간 정각에 발표되지만, 실제로는 약 10-20분 지연될 수 있음
-    // 현재 시간이 정각에서 30분 이내라면 이전 시간의 데이터 사용
     let baseHour = currentHour
     let baseDate = now.format('YYYYMMDD')
 
     if (currentMinute < 30) {
-      // 30분 이전이면 이전 시간의 데이터 사용
       baseHour = currentHour - 1
 
-      // 자정 이전 처리
       if (baseHour < 0) {
         baseHour = 23
         baseDate = now.subtract(1, 'day').format('YYYYMMDD')
@@ -113,7 +107,7 @@ export function useWeather(): UseWeatherReturn {
     const forecastHours = [2, 5, 8, 11, 14, 17, 20, 23]
 
     // 현재 시간보다 작거나 같은 가장 최근 발표 시간 찾기
-    let baseHour = forecastHours[forecastHours.length - 1] // 기본값: 23시
+    let baseHour = forecastHours[forecastHours.length - 1]
 
     for (let i = forecastHours.length - 1; i >= 0; i--) {
       if (forecastHours[i] <= currentHour) {
@@ -337,7 +331,7 @@ export function useWeather(): UseWeatherReturn {
         const today = dayjs().format('YYYYMMDD')
         const tomorrow = dayjs().add(1, 'day').format('YYYYMMDD')
         const dayAfterTomorrow = dayjs().add(2, 'day').format('YYYYMMDD')
-        
+
         // 날짜 라벨 생성
         const getDateLabel = (dateStr: string, index: number): string => {
           const date = dayjs(dateStr, 'YYYYMMDD')
@@ -431,10 +425,7 @@ export function useWeather(): UseWeatherReturn {
           })
           const mostCommonSkyCode =
             Object.keys(skyCodeCounts).length > 0
-              ? parseInt(
-                  Object.entries(skyCodeCounts).sort((a, b) => b[1] - a[1])[0][0],
-                  10,
-                )
+              ? parseInt(Object.entries(skyCodeCounts).sort((a, b) => b[1] - a[1])[0][0], 10)
               : 1
           const dateSky = skyMap[mostCommonSkyCode] || '맑음'
 
@@ -454,10 +445,7 @@ export function useWeather(): UseWeatherReturn {
           })
           const mostCommonPtyCode =
             Object.keys(ptyCodeCounts).length > 0
-              ? parseInt(
-                  Object.entries(ptyCodeCounts).sort((a, b) => b[1] - a[1])[0][0],
-                  10,
-                )
+              ? parseInt(Object.entries(ptyCodeCounts).sort((a, b) => b[1] - a[1])[0][0], 10)
               : 0
           const datePrecipitation = ptyMap[mostCommonPtyCode] || '없음'
 

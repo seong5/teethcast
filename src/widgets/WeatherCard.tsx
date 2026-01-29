@@ -9,7 +9,6 @@ export interface WeatherCardProps {
   address?: string
   latitude?: number
   longitude?: number
-  /** 즐겨찾기용 커스텀 ID (예: 현재 위치용 'current-location') */
   favoriteIdOverride?: string
 }
 
