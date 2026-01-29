@@ -3,6 +3,7 @@
 import { useEffect, useRef } from 'react'
 import { SearchBar } from '@/shared/ui'
 import { ClockIcon, CloudIcon } from '@/shared/ui/WeatherIcon'
+import { SectionTitleWithUpdate } from '@/shared/ui'
 import WeatherCard from '@/widgets/WeatherCard'
 import HourlyWeatherCard from '@/widgets/HourlyWeather'
 import DailyWeatherCard from '@/widgets/DailyWeather'
@@ -126,17 +127,11 @@ export function HomePage() {
               <>
                 <div className="flex flex-col lg:flex-row lg:items-stretch gap-4 md:gap-6">
                   <div className="flex-1 flex flex-col">
-                    <div className="mb-3 flex items-center gap-2 md:mb-4 md:gap-4">
-                      <h2 className="text-base font-bold text-gray-800 dark:text-white flex items-center gap-2 md:text-lg">
-                        <CloudIcon size={20} />
-                        현재 날씨
-                      </h2>
-                      {weather.baseTime && (
-                        <span className="text-[10px] text-gray-500 dark:text-gray-400 md:text-xs">
-                          업데이트: {weather.baseTime}
-                        </span>
-                      )}
-                    </div>
+                    <SectionTitleWithUpdate
+                      icon={<CloudIcon size={20} />}
+                      title="현재 날씨"
+                      updateTime={weather.baseTime}
+                    />
                     <div className="flex-1">
                       <WeatherCard
                         weather={weather}
@@ -149,12 +144,11 @@ export function HomePage() {
 
                   {weather.daily && weather.daily.length > 0 && (
                     <div className="flex-1 lg:max-w-md flex flex-col">
-                      <div className="mb-3 flex items-center gap-2 md:mb-4 md:gap-4">
-                        <h2 className="text-base font-bold text-gray-800 dark:text-white flex items-center gap-2 md:text-lg">
-                          <CloudIcon size={20} />
-                          단기 예보
-                        </h2>
-                      </div>
+                      <SectionTitleWithUpdate
+                        icon={<CloudIcon size={20} />}
+                        title="단기 예보"
+                        updateTime={weather.dailyBaseTime}
+                      />
                       <div className="flex-1">
                         <DailyWeatherCard daily={weather.daily} />
                       </div>
@@ -164,17 +158,11 @@ export function HomePage() {
 
                 {weather.hourly && (
                   <div>
-                    <div className="mb-3 flex items-center gap-2 md:mb-4 md:gap-4">
-                      <h2 className="text-base font-bold text-gray-800 dark:text-white flex items-center gap-2 md:text-lg">
-                        <ClockIcon size={20} />
-                        시간대별 날씨
-                      </h2>
-                      {weather.baseTime && (
-                        <span className="text-[10px] text-gray-500 dark:text-gray-400 md:text-xs">
-                          업데이트: {weather.baseTime}
-                        </span>
-                      )}
-                    </div>
+                    <SectionTitleWithUpdate
+                      icon={<ClockIcon size={20} />}
+                      title="시간대별 날씨"
+                      updateTime={weather.baseTime}
+                    />
                     <HourlyWeatherCard hourly={weather.hourly} />
                   </div>
                 )}

@@ -5,21 +5,15 @@ import type { HourlyWeather } from '@/shared/lib'
 
 export interface HourlyWeatherCardProps {
   hourly: HourlyWeather[]
-  baseTime?: string
 }
 
-export default function HourlyWeatherCard({ hourly, baseTime }: HourlyWeatherCardProps) {
+export default function HourlyWeatherCard({ hourly }: HourlyWeatherCardProps) {
   if (!hourly || hourly.length === 0) {
     return null
   }
 
   return (
     <div className="w-full bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-xl border border-gray-100 dark:border-gray-700 md:rounded-3xl md:p-6">
-      {baseTime && (
-        <div className="text-xs text-gray-500 dark:text-gray-400 mb-3 text-center md:mb-4">
-          업데이트: {baseTime}
-        </div>
-      )}
       <div className="w-full overflow-x-auto -mx-1 px-1 md:overflow-visible md:mx-0 md:px-0">
         <div className="flex items-stretch gap-2 w-max min-w-full md:w-full md:min-w-0 md:gap-3">
           {hourly.map((hourlyItem, index) => (
