@@ -3,7 +3,11 @@
 import { useMemo } from 'react'
 import { Star } from 'lucide-react'
 import { showToast } from '@/shared/ui/toast'
-import { useFavoritesStore } from '@/entities/favorite'
+import {
+  useFavoritesStore,
+  generateFavoriteId,
+  generateFavoriteIdCoarse,
+} from '@/entities/favorite'
 
 export interface FavoriteButtonProps {
   latitude: number
@@ -12,12 +16,6 @@ export interface FavoriteButtonProps {
   className?: string
   size?: number
   idOverride?: string
-}
-
-function generateFavoriteId(lat: number, lon: number): string {
-  const roundedLat = Math.round(lat * 1000000) / 1000000
-  const roundedLon = Math.round(lon * 1000000) / 1000000
-  return `${roundedLat}-${roundedLon}`
 }
 
 export default function FavoriteButton({
@@ -42,14 +40,34 @@ export default function FavoriteButton({
   // hydration이 완료된 후에만 즐겨찾기 여부를 계산
   const isFav = useMemo(() => {
     if (!hasHydrated) return false
-    return favorites.some((fav) => fav.id === favoriteId)
-  }, [favorites, favoriteId, hasHydrated])
+    // 정확한 ID 매칭
+    if (favorites.some((fav) => fav.id === favoriteId)) return true
+    // idOverride 없을 때(홈의 현재 위치): GPS 오차로 ID가 달라질 수 있으므로, 소수 5자리(coarse)로도 비교
+    if (idOverride == null) {
+      const coarseId = generateFavoriteIdCoarse(latitude, longitude)
+      return favorites.some(
+        (fav) => generateFavoriteIdCoarse(fav.latitude, fav.longitude) === coarseId,
+      )
+    }
+    return false
+  }, [favorites, favoriteId, hasHydrated, idOverride, latitude, longitude])
 
   const handleToggle = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation()
 
     if (isFav) {
-      removeFavorite(favoriteId)
+      // idOverride 없을 때(홈): coarse로 매칭된 항목의 실제 id로 제거
+      const idToRemove =
+        idOverride != null
+          ? favoriteId
+          : favorites.find((fav) => fav.id === favoriteId)?.id ??
+            favorites.find(
+              (fav) =>
+                generateFavoriteIdCoarse(fav.latitude, fav.longitude) ===
+                generateFavoriteIdCoarse(latitude, longitude),
+            )?.id ??
+            favoriteId
+      removeFavorite(idToRemove)
       showToast.success('즐겨찾기에서 제거했습니다.')
     } else {
       addFavorite(

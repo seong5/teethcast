@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Pencil } from 'lucide-react'
 import WeatherIcon from '@/shared/ui/WeatherIcon'
 import { useWeather } from '@/shared/lib'
-import { useFavoritesStore } from '@/entities/favorite'
+import { useFavoritesStore, roundTo6Decimals } from '@/entities/favorite'
 import type { FavoriteLocation } from '@/entities/favorite'
 import FavoriteButton from './FavoriteButton'
 
@@ -28,8 +28,10 @@ export default function FavoriteCard({ favorite }: FavoriteCardProps) {
 
   const handleClick = () => {
     if (isEditing) return
+    const latStr = roundTo6Decimals(favorite.latitude).toFixed(6)
+    const lonStr = roundTo6Decimals(favorite.longitude).toFixed(6)
     router.push(
-      `/weather/${favorite.latitude.toFixed(6)}/${favorite.longitude.toFixed(6)}?favoriteId=${encodeURIComponent(favorite.id)}`,
+      `/weather/${latStr}/${lonStr}?favoriteId=${encodeURIComponent(favorite.id)}`,
     )
   }
 

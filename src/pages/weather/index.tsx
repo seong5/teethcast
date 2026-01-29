@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { ArrowLeft } from 'lucide-react'
 import { ClockIcon, CloudIcon } from '@/shared/ui/WeatherIcon'
 import WeatherCard from '@/widgets/WeatherCard'
@@ -16,7 +16,11 @@ export interface WeatherDetailPageProps {
   favoriteId?: string
 }
 
-export function WeatherDetailPage({ lat, lon, favoriteId }: WeatherDetailPageProps) {
+export function WeatherDetailPage({ lat, lon, favoriteId: favoriteIdProp }: WeatherDetailPageProps) {
+  const searchParams = useSearchParams()
+  // URL 쿼리 파라미터에서 favoriteId를 직접 읽어옴 (prop보다 우선)
+  const favoriteIdFromUrl = searchParams?.get('favoriteId') ?? undefined
+  const favoriteId = favoriteIdFromUrl ?? favoriteIdProp
   const router = useRouter()
 
   const {

@@ -3,6 +3,10 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import type { FavoriteLocation } from './model'
+import {
+  roundTo6Decimals,
+  generateFavoriteId,
+} from './lib/coordinates'
 
 interface FavoritesStore {
   favorites: FavoriteLocation[]
@@ -14,19 +18,6 @@ interface FavoritesStore {
   isFavorite: (lat: number, lon: number) => boolean
   getFavoriteId: (lat: number, lon: number) => string
   clearAll: () => void
-}
-
-/**
- * 좌표를 기반으로 고유 ID 생성
- * @param lat 위도
- * @param lon 경도
- * @returns 고유 ID 문자열
- */
-function generateFavoriteId(lat: number, lon: number): string {
-  // 소수점 6자리까지 반올림하여 ID 생성
-  const roundedLat = Math.round(lat * 1000000) / 1000000
-  const roundedLon = Math.round(lon * 1000000) / 1000000
-  return `${roundedLat}-${roundedLon}`
 }
 
 export const useFavoritesStore = create<FavoritesStore>()(
@@ -42,11 +33,14 @@ export const useFavoritesStore = create<FavoritesStore>()(
 
       /**
        * 즐겨찾기 추가
+       * 좌표는 소수 6자리로 반올림해 저장·ID와 통일
        * @param location 즐겨찾기할 위치 정보
-       * @param customId 커스텀 ID (예: 현재 위치용 'current-location')
+       * @param customId 커스텀 ID (없으면 좌표 기반 ID 사용)
        */
       addFavorite: (location, customId) => {
-        const id = customId ?? generateFavoriteId(location.latitude, location.longitude)
+        const roundedLat = roundTo6Decimals(location.latitude)
+        const roundedLon = roundTo6Decimals(location.longitude)
+        const id = customId ?? generateFavoriteId(roundedLat, roundedLon)
 
         // 이미 같은 ID의 즐겨찾기가 있는지 확인
         const exists = get().favorites.some((fav) => fav.id === id)
@@ -56,6 +50,8 @@ export const useFavoritesStore = create<FavoritesStore>()(
 
         const newFavorite: FavoriteLocation = {
           ...location,
+          latitude: roundedLat,
+          longitude: roundedLon,
           id,
           createdAt: new Date().toISOString(),
         }
