@@ -11,7 +11,7 @@ export default function NavBar() {
     <nav className="border-b border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-3 py-2.5 sm:px-6 sm:py-4 lg:px-8">
         <Link href="/" className="flex items-center gap-1.5 sm:gap-3">
-          <span className="text-sm font-bold text-[#10a6c1] sm:text-lg md:text-xl dark:text-[#10a6c1]">Teethcast</span>
+          <span className="text-sm font-bold text-primary sm:text-lg md:text-xl dark:text-primary">Teethcast</span>
         </Link>
 
         <div className="flex items-center gap-1 sm:gap-2">

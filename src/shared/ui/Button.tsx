@@ -26,7 +26,7 @@ export default function Button({
 
   const variantStyles = {
     primary:
-      'bg-[#10a6c1] text-white hover:bg-[#0d8fa8] disabled:bg-gray-300 dark:disabled:bg-gray-600 rounded-xl',
+      'bg-primary text-white hover:bg-primaryHover disabled:bg-gray-300 dark:disabled:bg-gray-600 rounded-xl',
     secondary: 'bg-gray-900 text-white hover:opacity-90 disabled:bg-gray-300 dark:bg-gray-700 dark:disabled:bg-gray-600 rounded-2xl',
     outline:
       'bg-white border border-gray-200 text-gray-900 hover:bg-gray-50 disabled:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100 dark:hover:bg-gray-700 dark:disabled:bg-gray-800 rounded-xl',

@@ -105,7 +105,7 @@ export default function FavoriteCard({ favorite }: FavoriteCardProps) {
                   }
                 }}
                 onClick={(e) => e.stopPropagation()}
-                className="flex-1 min-w-0 max-w-full text-xs font-medium text-gray-800 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-[#10a6c1] md:text-sm"
+                className="flex-1 min-w-0 max-w-full text-xs font-medium text-gray-800 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-primary md:text-sm"
                 aria-label="별명 입력"
                 autoFocus
               />

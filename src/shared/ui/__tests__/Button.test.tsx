@@ -11,7 +11,7 @@ describe('Button', () => {
   it('기본적으로 primary variant가 적용된다', () => {
     render(<Button>Primary</Button>);
     const button = screen.getByRole('button');
-    expect(button).toHaveClass('bg-[#10a6c1]');
+    expect(button).toHaveClass('bg-primary');
   });
 
   it('secondary variant가 적용된다', () => {

@@ -74,7 +74,7 @@ const ToastItem = ({ type, content, onClose }: ToastItemProps) => {
                 onClick={() => {
                   handleClose()
                 }}
-                className="self-end text-[12px] font-semibold text-[#10a6c1] hover:text-[#0d8ba8] dark:text-[#38bdf8] dark:hover:text-[#7dd3fc] transition-colors underline-offset-4 hover:underline"
+                className="self-end text-[12px] font-semibold text-primary hover:text-primaryHover transition-colors underline-offset-4 hover:underline"
               >
                 즐겨찾기로 이동 →
               </Link>
