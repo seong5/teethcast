@@ -2,6 +2,7 @@
 
 import { useMemo } from 'react'
 import { Star } from 'lucide-react'
+import { showToast } from '@/shared/ui/toast'
 import { useFavoritesStore } from '@/entities/favorite'
 
 export interface FavoriteButtonProps {
@@ -10,7 +11,6 @@ export interface FavoriteButtonProps {
   name: string
   className?: string
   size?: number
-  /** 고정 ID를 강제로 사용할 때 (예: 현재 위치용 'current-location') */
   idOverride?: string
 }
 
@@ -50,6 +50,7 @@ export default function FavoriteButton({
 
     if (isFav) {
       removeFavorite(favoriteId)
+      showToast.message('즐겨찾기에서 제거했습니다.')
     } else {
       addFavorite(
         {
@@ -59,6 +60,7 @@ export default function FavoriteButton({
         },
         idOverride,
       )
+      showToast.favoriteAdded(name)
     }
   }
 
