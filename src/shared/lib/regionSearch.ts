@@ -2,6 +2,7 @@
 
 import { isHierarchicalRegions } from '@/shared/types/guards'
 import { fetchAPIWithGuard } from '@/shared/api/fetch'
+import { normalizeSidoName } from './formatAddress'
 
 export type HierarchicalRegions = {
   [sido: string]: {
@@ -84,23 +85,43 @@ export function searchRegions(query: string, regions: HierarchicalRegions): stri
       })
     }
   } else if (parts.length === 2) {
-    const [sido, sigungu] = parts
+    const [first, second] = parts
 
-    if (regions[sido]?.[sigungu]) {
-      regions[sido][sigungu].forEach((dong) => {
-        results.push({ sido, sigungu, dong })
+    // 첫 번째 시도: sido + sigungu로 검색
+    const normalizedSido = normalizeSidoName(first)
+    const sidoToTry = normalizedSido || first
+
+    if (regions[sidoToTry]?.[second]) {
+      regions[sidoToTry][second].forEach((dong) => {
+        results.push({ sido: sidoToTry, sigungu: second, dong })
       })
     } else {
+      // 부분 매칭으로 sido + sigungu 검색 시도
       Object.keys(regions).forEach((s) => {
-        if (s.toLowerCase().includes(sido.toLowerCase())) {
+        if (s.toLowerCase().includes(sidoToTry.toLowerCase())) {
           Object.keys(regions[s]).forEach((sg) => {
-            if (sg.toLowerCase().includes(sigungu.toLowerCase())) {
+            if (sg.toLowerCase().includes(second.toLowerCase())) {
               regions[s][sg].forEach((dong) => {
                 results.push({ sido: s, sigungu: sg, dong })
               })
             }
           })
         }
+      })
+    }
+
+    // 폴백: 첫 번째 시도에서 결과가 없으면 sigungu + dong으로 검색
+    if (results.length === 0) {
+      Object.keys(regions).forEach((s) => {
+        Object.keys(regions[s]).forEach((sg) => {
+          if (sg.toLowerCase().includes(first.toLowerCase())) {
+            regions[s][sg].forEach((d) => {
+              if (d.toLowerCase().includes(second.toLowerCase())) {
+                results.push({ sido: s, sigungu: sg, dong: d })
+              }
+            })
+          }
+        })
       })
     }
   } else if (parts.length >= 3) {
