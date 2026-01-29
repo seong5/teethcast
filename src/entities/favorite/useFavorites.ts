@@ -10,6 +10,7 @@ interface FavoritesStore {
   setHasHydrated: (hasHydrated: boolean) => void
   addFavorite: (location: Omit<FavoriteLocation, 'id' | 'createdAt'>, customId?: string) => void
   removeFavorite: (id: string) => void
+  updateFavoriteNickName: (id: string, nickName: string) => void
   isFavorite: (lat: number, lon: number) => boolean
   getFavoriteId: (lat: number, lon: number) => string
   clearAll: () => void
@@ -75,6 +76,20 @@ export const useFavoritesStore = create<FavoritesStore>()(
       },
 
       /**
+       * 즐겨찾기 별칭(닉네임) 변경
+       * @param id 즐겨찾기 ID
+       * @param nickName 새 별칭
+       */
+      updateFavoriteNickName: (id, nickName) => {
+        const trimmed = nickName.trim()
+        set((state) => ({
+          favorites: state.favorites.map((fav) =>
+            fav.id === id ? { ...fav, nickName: trimmed || undefined } : fav,
+          ),
+        }))
+      },
+
+      /**
        * 즐겨찾기 여부 확인
        * @param lat 위도
        * @param lon 경도
@@ -122,6 +137,7 @@ export function useFavorites() {
   const hasHydrated = useFavoritesStore((state) => state._hasHydrated)
   const addFavorite = useFavoritesStore((state) => state.addFavorite)
   const removeFavorite = useFavoritesStore((state) => state.removeFavorite)
+  const updateFavoriteNickName = useFavoritesStore((state) => state.updateFavoriteNickName)
   const isFavorite = useFavoritesStore((state) => state.isFavorite)
   const getFavoriteId = useFavoritesStore((state) => state.getFavoriteId)
   const clearAll = useFavoritesStore((state) => state.clearAll)
@@ -131,6 +147,7 @@ export function useFavorites() {
     hasHydrated,
     addFavorite,
     removeFavorite,
+    updateFavoriteNickName,
     isFavorite,
     getFavoriteId,
     clearAll,
