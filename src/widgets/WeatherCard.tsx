@@ -1,19 +1,45 @@
 'use client'
 
 import WeatherIcon, { WindIcon, HumidityIcon } from '@/shared/ui/WeatherIcon'
-import type { WeatherData } from '@/shared/lib/useWeather'
+import type { WeatherData } from '@/shared/lib'
+import { FavoriteButton } from '@/features/favorite-management'
 
 export interface WeatherCardProps {
   weather: WeatherData
   address?: string
+  latitude?: number
+  longitude?: number
+  favoriteIdOverride?: string
 }
 
-export default function WeatherCard({ weather, address }: WeatherCardProps) {
+export default function WeatherCard({
+  weather,
+  address,
+  latitude,
+  longitude,
+  favoriteIdOverride,
+}: WeatherCardProps) {
   return (
     <div className="w-full h-full">
       <div className="relative overflow-hidden bg-gradient-to-br from-blue-50 to-blue-100 dark:from-slate-800 dark:to-slate-900 rounded-3xl p-6 shadow-xl border border-white/20 dark:border-gray-700 h-full flex flex-col">
         <div className="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 rounded-full bg-blue-400/20 blur-2xl pointer-events-none"></div>
         <div className="absolute bottom-0 left-0 -ml-8 -mb-8 w-32 h-32 rounded-full bg-purple-400/20 blur-2xl pointer-events-none"></div>
+
+        {latitude !== undefined &&
+          longitude !== undefined &&
+          address &&
+          !Number.isNaN(latitude) &&
+          !Number.isNaN(longitude) && (
+            <div className="absolute top-4 right-4 z-10">
+              <FavoriteButton
+                latitude={latitude}
+                longitude={longitude}
+                name={address}
+                size={28}
+                idOverride={favoriteIdOverride}
+              />
+            </div>
+          )}
 
         <div className="relative flex flex-col items-center gap-6 text-center flex-1 justify-center">
           {address && (

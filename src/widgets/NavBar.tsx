@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Button, ThemeToggle } from '@/shared/ui';
 
-export default function Navbar() {
+export default function NavBar() {
   const pathname = usePathname();
 
   return (

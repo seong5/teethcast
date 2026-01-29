@@ -1,122 +1,81 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
-import { SearchBar } from '@/shared/ui'
+import { useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { ArrowLeft } from 'lucide-react'
 import { ClockIcon, CloudIcon } from '@/shared/ui/WeatherIcon'
 import WeatherCard from '@/widgets/WeatherCard'
 import HourlyWeatherCard from '@/widgets/HourlyWeather'
 import DailyWeatherCard from '@/widgets/DailyWeather'
-import { SearchResults } from '@/features/search'
-import { useSearch } from '@/features/search'
-import { useLocationSelection } from '@/features/location-selection'
-import {
-  useGeolocation,
-  useReverseGeocoding,
-  useWeather,
-} from '@/shared/lib'
+import { useReverseGeocoding, useWeather } from '@/shared/lib'
+import type { UseWeatherReturn } from '@/shared/lib'
 
-export function HomePage() {
-  const searchContainerRef = useRef<HTMLDivElement>(null)
-  const { position, error, isLoading, getCurrentPosition } = useGeolocation()
+export interface WeatherDetailPageProps {
+  lat: number
+  lon: number
+  favoriteId?: string
+}
+
+export function WeatherDetailPage({ lat, lon, favoriteId: favoriteIdProp }: WeatherDetailPageProps) {
+  const searchParams = useSearchParams()
+  // URL 쿼리 파라미터에서 favoriteId를 직접 읽어옴 (prop보다 우선)
+  const favoriteIdFromUrl = searchParams?.get('favoriteId') ?? undefined
+  const favoriteId = favoriteIdFromUrl ?? favoriteIdProp
+  const router = useRouter()
+
   const {
     address,
     error: addressError,
     isLoading: addressLoading,
     getAddressFromCoordinates,
   } = useReverseGeocoding()
-  const { weather, error: weatherError, isLoading: weatherLoading, getWeather } = useWeather()
-  
-  // 검색 기능
   const {
-    searchValue,
-    setSearchValue,
-    handleSearch,
-    searchResults,
-    searchError,
-    searchLoading,
-    isGettingCoordinates,
-    kakaoSearchError,
-    clearResults,
-  } = useSearch()
-  
-  // 위치 선택 기능
-  const { handleSelectLocation } = useLocationSelection(() => {
-    setSearchValue('')
-    clearResults()
-  })
+    weather,
+    error: weatherError,
+    isLoading: weatherLoading,
+    getWeather,
+  }: UseWeatherReturn = useWeather()
 
   useEffect(() => {
-    // 페이지 로드 시 자동으로 현재 위치 감지
-    getCurrentPosition()
-  }, [getCurrentPosition])
-
-  useEffect(() => {
-    if (position) {
-      getAddressFromCoordinates(position.latitude, position.longitude)
-      getWeather(position.latitude, position.longitude)
+    // 좌표가 유효한지 확인 (NaN이 아니고 0이 아닌 경우)
+    if (
+      !Number.isNaN(lat) &&
+      !Number.isNaN(lon) &&
+      lat !== 0 &&
+      lon !== 0 &&
+      lat >= -90 &&
+      lat <= 90 &&
+      lon >= -180 &&
+      lon <= 180
+    ) {
+      getAddressFromCoordinates(lat, lon)
+      getWeather(lat, lon)
     }
-  }, [position, getAddressFromCoordinates, getWeather])
-
-
-  // 검색 결과 외부 클릭 시 닫기
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        searchContainerRef.current &&
-        !searchContainerRef.current.contains(event.target as Node)
-      ) {
-        clearResults()
-      }
-    }
-
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
-    }
-  }, [clearResults])
+  }, [lat, lon, getAddressFromCoordinates, getWeather])
 
   return (
     <main className="flex min-h-screen flex-col items-center px-4 py-8 sm:px-6 sm:py-12 md:px-8 md:py-16 lg:p-10 bg-white dark:bg-gray-900">
       <div className="z-10 max-w-7xl w-full items-center justify-between font-mono text-sm">
-        <div ref={searchContainerRef} className="w-full max-w-5xl mx-auto mb-8 relative">
-          <SearchBar
-            value={searchValue}
-            onChange={setSearchValue}
-            placeholder="지역을 검색하세요 (예: 서울특별시, 종로구, 청운동)"
-            onSearchClick={handleSearch}
-          />
-          {(searchResults.length > 0 || searchLoading || isGettingCoordinates) && (
-            <div className="absolute top-full left-0 right-0 z-50 mt-2">
-              {isGettingCoordinates ? (
-                <div className="mt-2 rounded-2xl border border-gray-100 bg-white p-4 shadow-lg dark:border-gray-700 dark:bg-gray-800">
-                  <div className="text-center text-sm text-gray-500 dark:text-gray-400">
-                    좌표 정보를 가져오는 중...
-                  </div>
-                </div>
-              ) : (
-                <SearchResults
-                  results={searchResults}
-                  onSelect={handleSelectLocation}
-                  isLoading={searchLoading}
-                />
-              )}
-            </div>
-          )}
-          {(searchError || kakaoSearchError) && (
-            <div className="mt-2 text-center text-sm text-red-500 dark:text-red-400">
-              {searchError || kakaoSearchError}
-            </div>
-          )}
+        <div className="w-full max-w-5xl mx-auto mb-8">
+          <div className="flex items-center justify-between">
+            <button
+              type="button"
+              onClick={() => router.back()}
+              className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5" />
+              <span className="text-sm font-medium">뒤로가기</span>
+            </button>
+          </div>
         </div>
-
-        {(isLoading || addressLoading || weatherLoading) && (
+        {(addressLoading || weatherLoading) && (
           <div className="text-center text-sm text-gray-500 dark:text-gray-400 mb-4">
-            현재 위치와 날씨를 확인하는 중...
+            날씨를 확인하는 중...
           </div>
         )}
-        {(error || addressError || weatherError) && (
+        {(addressError || weatherError) && (
           <div className="text-center text-sm text-red-500 dark:text-red-400 mb-4">
-            {error || addressError || weatherError}
+            {addressError || weatherError}
           </div>
         )}
 
@@ -141,8 +100,9 @@ export function HomePage() {
                       <WeatherCard
                         weather={weather}
                         address={address.fullAddress}
-                        latitude={position?.latitude}
-                        longitude={position?.longitude}
+                        latitude={lat}
+                        longitude={lon}
+                        favoriteIdOverride={favoriteId}
                       />
                     </div>
                   </div>
@@ -186,3 +146,4 @@ export function HomePage() {
     </main>
   )
 }
+

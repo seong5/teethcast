@@ -1,11 +1,7 @@
-// 공유 유틸리티 함수들
-export { useTheme } from './useTheme'
-export { useGeolocation } from './useGeolocation'
-export { useReverseGeocoding } from './useReverseGeocoding'
-export { useWeather } from './useWeather'
-export { useLocationSearch } from './useLocationSearch'
-export type { LocationSearchResult, UseLocationSearchReturn } from './useLocationSearch'
-export type { UseWeatherReturn, WeatherData, HourlyWeather, DailyWeather } from './useWeather'
-export type { Address, UseReverseGeocodingReturn } from './useReverseGeocoding'
-export { convertLatLonToGrid, convertGridToLatLon } from './convertCoordinates'
-export * from './regionSearch'
+// 공유 유틸리티 함수들 - 세그먼트별로 재export
+export * from './weather'
+export * from './location'
+export * from './utils'
+
+// UI 관련 (shared/ui에서 re-export)
+export { showToast } from '../ui/toast'

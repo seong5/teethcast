@@ -2,12 +2,8 @@
 
 import { isHierarchicalRegions } from '@/shared/types/guards'
 import { fetchAPIWithGuard } from '@/shared/api/fetch'
-
-export type HierarchicalRegions = {
-  [sido: string]: {
-    [sigungu: string]: string[]
-  }
-}
+import { normalizeSidoName } from './formatAddress'
+import type { HierarchicalRegions } from '@/shared/types/location'
 
 let regionsCache: HierarchicalRegions | null = null
 
@@ -30,11 +26,6 @@ export async function loadRegions(): Promise<HierarchicalRegions> {
   }
 }
 
-/**
- * 계층 구조에서 검색 결과를 평면 주소 배열로 변환
- * @param results 검색 결과 배열 [{sido, sigungu, dong?}]
- * @returns 주소 문자열 배열 (예: ["서울특별시 종로구 청운동"])
- */
 function formatSearchResults(
   results: Array<{ sido: string; sigungu: string; dong?: string }>,
 ): string[] {
@@ -45,12 +36,6 @@ function formatSearchResults(
   })
 }
 
-/**
- * 계층 구조 데이터에서 검색 수행
- * @param query 검색어
- * @param regions 계층 구조 행정구역 데이터
- * @returns 검색 결과 배열 (주소 문자열)
- */
 export function searchRegions(query: string, regions: HierarchicalRegions): string[] {
   const trimmed = query.trim()
   if (!trimmed || Object.keys(regions).length === 0) return []
@@ -84,23 +69,39 @@ export function searchRegions(query: string, regions: HierarchicalRegions): stri
       })
     }
   } else if (parts.length === 2) {
-    const [sido, sigungu] = parts
+    const [first, second] = parts
+    const normalizedSido = normalizeSidoName(first)
+    const sidoToTry = normalizedSido || first
 
-    if (regions[sido]?.[sigungu]) {
-      regions[sido][sigungu].forEach((dong) => {
-        results.push({ sido, sigungu, dong })
+    if (regions[sidoToTry]?.[second]) {
+      regions[sidoToTry][second].forEach((dong) => {
+        results.push({ sido: sidoToTry, sigungu: second, dong })
       })
     } else {
       Object.keys(regions).forEach((s) => {
-        if (s.toLowerCase().includes(sido.toLowerCase())) {
+        if (s.toLowerCase().includes(sidoToTry.toLowerCase())) {
           Object.keys(regions[s]).forEach((sg) => {
-            if (sg.toLowerCase().includes(sigungu.toLowerCase())) {
+            if (sg.toLowerCase().includes(second.toLowerCase())) {
               regions[s][sg].forEach((dong) => {
                 results.push({ sido: s, sigungu: sg, dong })
               })
             }
           })
         }
+      })
+    }
+
+    if (results.length === 0) {
+      Object.keys(regions).forEach((s) => {
+        Object.keys(regions[s]).forEach((sg) => {
+          if (sg.toLowerCase().includes(first.toLowerCase())) {
+            regions[s][sg].forEach((d) => {
+              if (d.toLowerCase().includes(second.toLowerCase())) {
+                results.push({ sido: s, sigungu: sg, dong: d })
+              }
+            })
+          }
+        })
       })
     }
   } else if (parts.length >= 3) {
@@ -156,14 +157,13 @@ export function searchRegions(query: string, regions: HierarchicalRegions): stri
 
   const limitedResults = uniqueResults.slice(0, 10)
 
+  if (limitedResults.length === 0) {
+    return ['해당 장소의 정보가 제공되지 않습니다.']
+  }
+
   return formatSearchResults(limitedResults)
 }
 
-/**
- * 주소 문자열을 파싱하여 시/도, 시/군/구, 동/읍/면으로 분리
- * @param address 띄어쓰기 형식 주소 (예: "서울특별시 종로구 청운동")
- * @returns 파싱된 주소 정보
- */
 export function parseAddress(address: string): {
   sido: string
   sigungu: string
