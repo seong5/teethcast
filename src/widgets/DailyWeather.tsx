@@ -13,11 +13,11 @@ export default function DailyWeatherCard({ daily }: DailyWeatherCardProps) {
   }
 
   return (
-    <div className="w-full bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-xl border border-gray-100 dark:border-gray-700 h-full flex flex-col gap-2 md:rounded-3xl md:p-6 md:gap-3">
+    <div className="w-full bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-xl border border-gray-100 dark:border-gray-700 h-full flex flex-col gap-2 min-h-[260px] md:rounded-3xl md:p-6 md:gap-3 md:min-h-[300px]">
       {daily.map((day) => (
         <div
           key={day.date}
-          className="flex flex-col items-center gap-2 rounded-xl p-3 bg-gray-50 dark:bg-gray-700/50 border border-transparent hover:border-gray-200 dark:hover:border-gray-600 transition-colors sm:flex-row sm:items-center sm:justify-between sm:gap-4 md:rounded-2xl md:p-4 md:flex-1"
+          className="flex flex-col items-center gap-2 rounded-xl p-3 bg-gray-50 dark:bg-gray-700/50 border border-transparent min-h-[72px] hover:border-gray-200 dark:hover:border-gray-600 transition-colors sm:flex-row sm:items-center sm:justify-between sm:gap-4 md:rounded-2xl md:p-4 md:flex-1 md:min-h-[80px]"
         >
             <div className="flex items-center gap-3 flex-1 min-w-0 sm:gap-4">
               <div className="flex-shrink-0 text-center sm:text-left">

@@ -1,6 +1,7 @@
 'use client'
 
 import type { LocationSearchResult } from '@/shared/lib'
+import { SearchResultsSkeleton } from './SearchResultsSkeleton'
 
 export interface SearchResultsProps {
   results: LocationSearchResult[]
@@ -14,11 +15,7 @@ export function SearchResults({
   isLoading = false,
 }: SearchResultsProps) {
   if (isLoading) {
-    return (
-      <div className="mt-2 rounded-2xl border border-gray-100 bg-white p-4 shadow-lg dark:border-gray-700 dark:bg-gray-800">
-        <div className="text-center text-xs text-gray-500 dark:text-gray-400 md:text-sm">검색 중...</div>
-      </div>
-    )
+    return <SearchResultsSkeleton />
   }
 
   if (results.length === 0) {

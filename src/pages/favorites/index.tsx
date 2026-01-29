@@ -3,11 +3,13 @@
 import { useRouter } from 'next/navigation'
 import { ArrowLeft } from 'lucide-react'
 import { useFavorites } from '@/entities/favorite'
-import { FavoriteCard } from '@/features/favorite-management'
+import { FavoriteCard, FavoriteCardSkeleton } from '@/features/favorite-management'
+
+const FAVORITES_SKELETON_COUNT = 6
 
 export function FavoritesPage() {
   const router = useRouter()
-  const { favorites } = useFavorites()
+  const { favorites, hasHydrated } = useFavorites()
 
   return (
     <main className="flex min-h-screen flex-col items-center px-4 py-8 sm:px-6 sm:py-12 md:px-8 md:py-16 lg:p-10 bg-white dark:bg-gray-900">
@@ -28,7 +30,13 @@ export function FavoritesPage() {
           </p>
         </div>
 
-        {favorites.length === 0 ? (
+        {!hasHydrated ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto w-full">
+            {Array.from({ length: FAVORITES_SKELETON_COUNT }).map((_, i) => (
+              <FavoriteCardSkeleton key={i} />
+            ))}
+          </div>
+        ) : favorites.length === 0 ? (
           <div className="flex flex-col items-center justify-center min-h-[320px] md:min-h-[400px] max-w-5xl mx-auto">
             <div className="text-center">
               <div className="text-5xl mb-3 md:text-6xl md:mb-4">⭐</div>

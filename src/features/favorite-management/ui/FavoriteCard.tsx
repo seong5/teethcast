@@ -8,6 +8,7 @@ import { useWeather } from '@/shared/lib'
 import { useFavoritesStore, roundTo6Decimals } from '@/entities/favorite'
 import type { FavoriteLocation } from '@/entities/favorite'
 import FavoriteButton from './FavoriteButton'
+import FavoriteCardSkeleton from './FavoriteCardSkeleton'
 
 export interface FavoriteCardProps {
   favorite: FavoriteLocation
@@ -49,32 +50,8 @@ export default function FavoriteCard({ favorite }: FavoriteCardProps) {
     setIsEditing(true)
   }
 
-  if (isLoading) {
-    return (
-      <div
-        onClick={handleClick}
-        className="w-full bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-xl border border-gray-100 dark:border-gray-700 cursor-pointer hover:shadow-2xl transition-shadow md:rounded-3xl md:p-6"
-      >
-        <div className="flex items-center justify-center min-h-[120px] md:min-h-[160px]">
-          <div className="text-xs text-gray-500 dark:text-gray-400 md:text-sm">날씨 정보를 불러오는 중...</div>
-        </div>
-      </div>
-    )
-  }
-
-  if (!weather) {
-    return (
-      <div
-        onClick={handleClick}
-        className="w-full bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-xl border border-gray-100 dark:border-gray-700 cursor-pointer hover:shadow-2xl transition-shadow md:rounded-3xl md:p-6"
-      >
-        <div className="flex items-center justify-center min-h-[120px] md:min-h-[160px]">
-          <div className="text-xs text-gray-500 dark:text-gray-400 md:text-sm">
-            날씨 정보를 불러올 수 없습니다.
-          </div>
-        </div>
-      </div>
-    )
+  if (isLoading || !weather) {
+    return <FavoriteCardSkeleton />
   }
 
   return (

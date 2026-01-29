@@ -20,7 +20,7 @@ export default function WeatherCard({
   favoriteIdOverride,
 }: WeatherCardProps) {
   return (
-    <div className="w-full h-full">
+    <div className="w-full h-full min-h-[340px] md:min-h-[380px]">
       <div className="relative overflow-hidden bg-gradient-to-br from-blue-50 to-blue-100 dark:from-slate-800 dark:to-slate-900 rounded-2xl p-4 shadow-xl border border-white/20 dark:border-gray-700 h-full flex flex-col md:rounded-3xl md:p-6">
         <div className="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 rounded-full bg-blue-400/20 blur-2xl pointer-events-none"></div>
         <div className="absolute bottom-0 left-0 -ml-8 -mb-8 w-32 h-32 rounded-full bg-purple-400/20 blur-2xl pointer-events-none"></div>

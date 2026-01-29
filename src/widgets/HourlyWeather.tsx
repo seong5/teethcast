@@ -19,7 +19,7 @@ export default function HourlyWeatherCard({ hourly }: HourlyWeatherCardProps) {
           {hourly.map((hourlyItem, index) => (
             <div
               key={index}
-              className="flex-shrink-0 w-[88px] bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3 text-center border border-transparent flex flex-col items-center md:flex-1 md:min-w-0 md:rounded-2xl"
+              className="flex-shrink-0 w-[88px] bg-gray-50 dark:bg-gray-700/50 rounded-xl p-3 text-center border border-transparent flex flex-col items-center min-h-[132px] md:flex-1 md:min-w-0 md:rounded-2xl md:min-h-[140px]"
             >
               <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 md:text-[15px] md:mb-2">
                 {hourlyItem.time}
