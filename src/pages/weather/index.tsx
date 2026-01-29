@@ -55,43 +55,43 @@ export function WeatherDetailPage({ lat, lon, favoriteId: favoriteIdProp }: Weat
 
   return (
     <main className="flex min-h-screen flex-col items-center px-4 py-8 sm:px-6 sm:py-12 md:px-8 md:py-16 lg:p-10 bg-white dark:bg-gray-900">
-      <div className="z-10 max-w-7xl w-full items-center justify-between font-mono text-sm">
-        <div className="w-full max-w-5xl mx-auto mb-8">
+      <div className="z-10 max-w-7xl w-full items-center justify-between font-mono text-xs md:text-sm">
+        <div className="w-full max-w-5xl mx-auto mb-6 md:mb-8">
           <div className="flex items-center justify-between">
             <button
               type="button"
               onClick={() => router.back()}
               className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
             >
-              <ArrowLeft className="w-5 h-5" />
-              <span className="text-sm font-medium">뒤로가기</span>
+              <ArrowLeft className="w-4 h-4 md:w-5 md:h-5" />
+              <span className="text-xs font-medium md:text-sm">뒤로가기</span>
             </button>
           </div>
         </div>
         {(addressLoading || weatherLoading) && (
-          <div className="text-center text-sm text-gray-500 dark:text-gray-400 mb-4">
+          <div className="text-center text-xs text-gray-500 dark:text-gray-400 mb-4 md:text-sm">
             날씨를 확인하는 중...
           </div>
         )}
         {(addressError || weatherError) && (
-          <div className="text-center text-sm text-red-500 dark:text-red-400 mb-4">
+          <div className="text-center text-xs text-red-500 dark:text-red-400 mb-4 md:text-sm">
             {addressError || weatherError}
           </div>
         )}
 
         {address && (
-          <div className="space-y-6 max-w-5xl mx-auto w-full">
+          <div className="space-y-4 md:space-y-6 max-w-5xl mx-auto w-full">
             {weather !== null && (
               <>
-                <div className="flex flex-col lg:flex-row lg:items-stretch gap-6">
+                <div className="flex flex-col lg:flex-row lg:items-stretch gap-4 md:gap-6">
                   <div className="flex-1 flex flex-col">
-                    <div className="mb-4 flex items-center gap-4">
-                      <h2 className="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2">
+                    <div className="mb-3 flex items-center gap-2 md:mb-4 md:gap-4">
+                      <h2 className="text-base font-bold text-gray-800 dark:text-white flex items-center gap-2 md:text-lg">
                         <CloudIcon size={20} />
                         현재 날씨
                       </h2>
                       {weather.baseTime && (
-                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                        <span className="text-[10px] text-gray-500 dark:text-gray-400 md:text-xs">
                           업데이트: {weather.baseTime}
                         </span>
                       )}
@@ -109,8 +109,8 @@ export function WeatherDetailPage({ lat, lon, favoriteId: favoriteIdProp }: Weat
 
                   {weather.daily && weather.daily.length > 0 && (
                     <div className="flex-1 lg:max-w-md flex flex-col">
-                      <div className="mb-4 flex items-center gap-4">
-                        <h2 className="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2">
+                      <div className="mb-3 flex items-center gap-2 md:mb-4 md:gap-4">
+                        <h2 className="text-base font-bold text-gray-800 dark:text-white flex items-center gap-2 md:text-lg">
                           <CloudIcon size={20} />
                           단기 예보
                         </h2>
@@ -124,13 +124,13 @@ export function WeatherDetailPage({ lat, lon, favoriteId: favoriteIdProp }: Weat
 
                 {weather.hourly && (
                   <div>
-                    <div className="mb-4 flex items-center gap-4">
-                      <h2 className="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2">
+                    <div className="mb-3 flex items-center gap-2 md:mb-4 md:gap-4">
+                      <h2 className="text-base font-bold text-gray-800 dark:text-white flex items-center gap-2 md:text-lg">
                         <ClockIcon size={20} />
                         시간대별 날씨
                       </h2>
                       {weather.baseTime && (
-                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                        <span className="text-[10px] text-gray-500 dark:text-gray-400 md:text-xs">
                           업데이트: {weather.baseTime}
                         </span>
                       )}

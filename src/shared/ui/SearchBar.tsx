@@ -37,7 +37,7 @@ export default function SearchBar({
             }
           }}
           aria-label={placeholder || '검색어 입력'}
-          className="w-full rounded-xl border-none bg-slate-50 py-3 px-3 text-sm font-medium text-black outline-none transition-all focus:ring-4 focus:ring-[#10a6c1]/20 focus:border focus:border-[#10a6c1] dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 sm:rounded-2xl sm:py-3.5 sm:px-4"
+          className="w-full rounded-xl border-none bg-slate-50 py-3 px-3 text-xs font-medium text-black outline-none transition-all focus:ring-4 focus:ring-[#10a6c1]/20 focus:border focus:border-[#10a6c1] dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 sm:rounded-2xl sm:py-3.5 sm:px-4 sm:text-sm"
         />
       </div>
       {onSearchClick && (
@@ -45,7 +45,7 @@ export default function SearchBar({
           <button
             onClick={onSearchClick}
             aria-label="검색 실행"
-            className="flex flex-1 items-center justify-center rounded-xl border border-[#10a6c1] bg-[#10a6c1] px-4 py-3 text-sm font-black text-white transition-all hover:bg-[#0d8fa8] focus:outline-none focus:ring-2 focus:ring-[#10a6c1] focus:ring-offset-2 sm:rounded-2xl sm:px-6 sm:py-3.5 md:flex-none"
+            className="flex flex-1 items-center justify-center rounded-xl border border-[#10a6c1] bg-[#10a6c1] px-4 py-3 text-xs font-black text-white transition-all hover:bg-[#0d8fa8] focus:outline-none focus:ring-2 focus:ring-[#10a6c1] focus:ring-offset-2 sm:rounded-2xl sm:px-6 sm:py-3.5 sm:text-sm md:flex-none"
           >
             검색
           </button>
