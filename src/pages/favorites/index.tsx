@@ -1,15 +1,28 @@
 'use client'
 
+import { useRouter } from 'next/navigation'
+import { ArrowLeft } from 'lucide-react'
 import { useFavorites } from '@/entities/favorite'
 import FavoriteCard from '@/widgets/FavoriteCard'
 
 export function FavoritesPage() {
+  const router = useRouter()
   const { favorites } = useFavorites()
 
   return (
     <main className="flex min-h-screen flex-col items-center px-4 py-8 sm:px-6 sm:py-12 md:px-8 md:py-16 lg:p-10 bg-white dark:bg-gray-900">
       <div className="z-10 max-w-7xl w-full items-center justify-between font-mono text-sm">
         <div className="w-full max-w-5xl mx-auto mb-8">
+          <div className="flex items-center justify-between mb-4 sm:mb-6">
+            <button
+              type="button"
+              onClick={() => router.back()}
+              className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5" />
+              <span className="text-sm font-medium">뒤로가기</span>
+            </button>
+          </div>
           <h1 className="text-3xl font-bold text-center mb-4 text-gray-900 dark:text-white sm:text-4xl sm:mb-6 md:mb-8">
             즐겨찾기
           </h1>
