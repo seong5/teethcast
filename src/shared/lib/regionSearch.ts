@@ -177,6 +177,10 @@ export function searchRegions(query: string, regions: HierarchicalRegions): stri
 
   const limitedResults = uniqueResults.slice(0, 10)
 
+  if (limitedResults.length === 0) {
+    return ['해당 장소의 정보가 제공되지 않습니다.']
+  }
+
   return formatSearchResults(limitedResults)
 }
 
