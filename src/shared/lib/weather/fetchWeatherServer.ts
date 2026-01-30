@@ -1,6 +1,18 @@
 import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc'
+import timezone from 'dayjs/plugin/timezone'
 import { convertLatLonToGrid } from './convertCoordinates'
 import type { WeatherData, HourlyWeather, DailyWeather } from '@/shared/types/weather'
+
+dayjs.extend(utc)
+dayjs.extend(timezone)
+
+const KST = 'Asia/Seoul'
+
+/** 현재 시각을 한국 시간(KST) 기준으로 반환 */
+function nowKst() {
+  return dayjs.tz(undefined, KST)
+}
 
 interface KMAItem {
   category: string
@@ -20,7 +32,7 @@ interface KMAResponse {
 }
 
 function getUltraSrtBaseTime() {
-  const now = dayjs()
+  const now = nowKst()
   const currentHour = now.hour()
   const currentMinute = now.minute()
   let baseHour = currentHour
@@ -36,7 +48,7 @@ function getUltraSrtBaseTime() {
 }
 
 function getVilageBaseTime() {
-  const now = dayjs()
+  const now = nowKst()
   const currentHour = now.hour()
   const forecastHours = [2, 5, 8, 11, 14, 17, 20, 23]
   let baseHour = forecastHours[forecastHours.length - 1]
@@ -133,7 +145,7 @@ export async function fetchWeatherDataServer(
   if (currentItems.length === 0) throw new Error('초단기실황 데이터를 찾을 수 없습니다.')
   if (forecastItems.length === 0) throw new Error('초단기예보 데이터를 찾을 수 없습니다.')
 
-  const now = dayjs()
+  const now = nowKst()
   const currentTime = now.format('HHmm')
 
   const safeParseFloat = (v: string | undefined | null, def: number) => {
@@ -195,9 +207,9 @@ export async function fetchWeatherDataServer(
     0,
   )
 
-  const today = dayjs().format('YYYYMMDD')
-  const tomorrow = dayjs().add(1, 'day').format('YYYYMMDD')
-  const dayAfterTomorrow = dayjs().add(2, 'day').format('YYYYMMDD')
+  const today = nowKst().format('YYYYMMDD')
+  const tomorrow = nowKst().add(1, 'day').format('YYYYMMDD')
+  const dayAfterTomorrow = nowKst().add(2, 'day').format('YYYYMMDD')
 
   const getDateLabel = (dateStr: string, index: number): string => {
     const d = dayjs(dateStr, 'YYYYMMDD')
@@ -351,12 +363,20 @@ export async function fetchWeatherDataServer(
     })
   }
 
-  const baseTimeFormatted = dayjs(
-    `${ultraBaseDate} ${ultraBaseTime.substring(0, 2)}:${ultraBaseTime.substring(2, 4)}`,
-  ).format('YYYY-MM-DD HH:mm')
-  const dailyBaseTimeFormatted = dayjs(
-    `${vilageBaseDate} ${vilageBaseTime.substring(0, 2)}:${vilageBaseTime.substring(2, 4)}`,
-  ).format('YYYY-MM-DD HH:mm')
+  const baseTimeFormatted = dayjs
+    .tz(
+      `${ultraBaseDate} ${ultraBaseTime.substring(0, 2)}:${ultraBaseTime.substring(2, 4)}`,
+      'YYYYMMDD HH:mm',
+      KST,
+    )
+    .format('YYYY-MM-DD HH:mm')
+  const dailyBaseTimeFormatted = dayjs
+    .tz(
+      `${vilageBaseDate} ${vilageBaseTime.substring(0, 2)}:${vilageBaseTime.substring(2, 4)}`,
+      'YYYYMMDD HH:mm',
+      KST,
+    )
+    .format('YYYY-MM-DD HH:mm')
 
   return {
     temperature,

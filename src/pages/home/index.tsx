@@ -1,7 +1,8 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { SearchBar } from '@/shared/ui'
+import { useFavoritesStore, generateFavoriteIdCoarse } from '@/entities/favorite'
 import { ClockIcon, CloudIcon } from '@/shared/ui/WeatherIcon'
 import { SectionTitleWithUpdate } from '@/shared/ui'
 import WeatherCard from '@/widgets/WeatherCard'
@@ -20,11 +21,11 @@ import {
   useMinimumLoadingState,
 } from '@/shared/lib'
 
-const SKELETON_MIN_MS = 400
+const SKELETON_MIN_MS = 200
 
 export function HomePage() {
   const searchContainerRef = useRef<HTMLDivElement>(null)
-  const { position, error, isLoading, getCurrentPosition } = useGeolocation()
+  const { position, error, isLoading } = useGeolocation()
   const {
     address,
     error: addressError,
@@ -33,11 +34,26 @@ export function HomePage() {
   } = useReverseGeocoding()
   const { weather, error: weatherError, isLoading: weatherLoading, getWeather } = useWeather()
 
-  const showSkeleton = useMinimumLoadingState(
-    isLoading || addressLoading || weatherLoading,
-    SKELETON_MIN_MS,
-  )
-  
+  // 위치는 있지만 주소/날씨가 아직 없을 때도 스켈레톤 유지 (깜빡임 방지)
+  const isPending =
+    isLoading ||
+    addressLoading ||
+    weatherLoading ||
+    (position != null && (address == null || weather === null))
+
+  const showSkeleton = useMinimumLoadingState(isPending, SKELETON_MIN_MS)
+
+  // 현재 위치가 즐겨찾기와 coarse 매칭되면 해당 id를 넘겨서 별 버튼이 일관되게 동작하도록 함
+  const favorites = useFavoritesStore((state) => state.favorites)
+  const favoriteIdOverride = useMemo(() => {
+    if (position == null) return undefined
+    const coarse = generateFavoriteIdCoarse(position.latitude, position.longitude)
+    const matched = favorites.find(
+      (fav) => generateFavoriteIdCoarse(fav.latitude, fav.longitude) === coarse,
+    )
+    return matched?.id
+  }, [position, favorites])
+
   // 검색 기능
   const {
     searchValue,
@@ -50,7 +66,7 @@ export function HomePage() {
     kakaoSearchError,
     clearResults,
   } = useSearch()
-  
+
   // 위치 선택 기능
   const { handleSelectLocation } = useLocationSelection(() => {
     setSearchValue('')
@@ -58,17 +74,11 @@ export function HomePage() {
   })
 
   useEffect(() => {
-    // 페이지 로드 시 자동으로 현재 위치 감지
-    getCurrentPosition()
-  }, [getCurrentPosition])
-
-  useEffect(() => {
     if (position) {
       getAddressFromCoordinates(position.latitude, position.longitude)
       getWeather(position.latitude, position.longitude)
     }
   }, [position, getAddressFromCoordinates, getWeather])
-
 
   // 검색 결과 외부 클릭 시 닫기
   useEffect(() => {
@@ -165,6 +175,7 @@ export function HomePage() {
                     address={address.fullAddress}
                     latitude={position?.latitude}
                     longitude={position?.longitude}
+                    favoriteIdOverride={favoriteIdOverride}
                   />
                 </div>
               </div>

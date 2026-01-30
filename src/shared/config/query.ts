@@ -7,32 +7,39 @@ const DAY = HOUR * 24
 export const QUERY_CONFIG = {
   // 날씨 데이터 쿼리 설정
   weather: {
-    staleTime: 10 * MINUTE, // 10분간 fresh 상태 유지
-    gcTime: 30 * MINUTE, // 30분간 캐시 유지
+    staleTime: 10 * MINUTE,
+    gcTime: 30 * MINUTE,
   },
 
   // 지역 검색 쿼리 설정
   locationSearch: {
-    staleTime: 5 * MINUTE, // 5분간 fresh 상태 유지
-    gcTime: 30 * MINUTE, // 30분간 캐시 유지
+    staleTime: 5 * MINUTE,
+    gcTime: 30 * MINUTE,
   },
 
   // 카카오 검색 쿼리 설정 (좌표 검색)
   kakaoSearch: {
-    staleTime: HOUR, // 1시간간 fresh 상태 유지 (좌표는 자주 바뀌지 않음)
-    gcTime: DAY, // 24시간간 캐시 유지
+    staleTime: HOUR,
+    gcTime: DAY,
   },
 
   // 역지오코딩 쿼리 설정 (좌표 → 주소)
   reverseGeocoding: {
-    staleTime: HOUR, // 1시간간 fresh 상태 유지 (주소는 자주 바뀌지 않음)
-    gcTime: DAY, // 24시간간 캐시 유지
+    staleTime: HOUR,
+    gcTime: DAY,
+  },
+
+  // 현재 위치(Geolocation) 쿼리 설정
+  geolocation: {
+    staleTime: 5 * MINUTE,
+    gcTime: 30 * MINUTE,
+    retry: 0,
   },
 
   // 기본 쿼리 설정 (QueryProvider에서 사용)
   default: {
-    staleTime: 5 * MINUTE, // 5분
-    gcTime: 10 * MINUTE, // 10분
+    staleTime: 5 * MINUTE,
+    gcTime: 10 * MINUTE,
     retry: 1,
     refetchOnWindowFocus: false,
   },
