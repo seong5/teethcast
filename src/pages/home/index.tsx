@@ -21,7 +21,7 @@ import {
   useMinimumLoadingState,
 } from '@/shared/lib'
 
-const SKELETON_MIN_MS = 400
+const SKELETON_MIN_MS = 200
 
 export function HomePage() {
   const searchContainerRef = useRef<HTMLDivElement>(null)
@@ -53,7 +53,7 @@ export function HomePage() {
     )
     return matched?.id
   }, [position, favorites])
-  
+
   // 검색 기능
   const {
     searchValue,
@@ -66,7 +66,7 @@ export function HomePage() {
     kakaoSearchError,
     clearResults,
   } = useSearch()
-  
+
   // 위치 선택 기능
   const { handleSelectLocation } = useLocationSelection(() => {
     setSearchValue('')
@@ -84,7 +84,6 @@ export function HomePage() {
       getWeather(position.latitude, position.longitude)
     }
   }, [position, getAddressFromCoordinates, getWeather])
-
 
   // 검색 결과 외부 클릭 시 닫기
   useEffect(() => {

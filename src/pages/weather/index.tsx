@@ -14,7 +14,7 @@ import HourlyWeatherSkeleton from '@/widgets/HourlyWeatherSkeleton'
 import { useReverseGeocoding, useWeather, useMinimumLoadingState } from '@/shared/lib'
 import type { UseWeatherReturn } from '@/shared/lib'
 
-const SKELETON_MIN_MS = 400
+const SKELETON_MIN_MS = 200
 
 export interface WeatherDetailPageProps {
   lat: number
@@ -22,7 +22,11 @@ export interface WeatherDetailPageProps {
   favoriteId?: string
 }
 
-export function WeatherDetailPage({ lat, lon, favoriteId: favoriteIdProp }: WeatherDetailPageProps) {
+export function WeatherDetailPage({
+  lat,
+  lon,
+  favoriteId: favoriteIdProp,
+}: WeatherDetailPageProps) {
   const searchParams = useSearchParams()
   // URL 쿼리 파라미터에서 favoriteId를 직접 읽어옴 (prop보다 우선)
   const favoriteIdFromUrl = searchParams?.get('favoriteId') ?? undefined
@@ -53,8 +57,7 @@ export function WeatherDetailPage({ lat, lon, favoriteId: favoriteIdProp }: Weat
     lon <= 180
 
   const isPending =
-    isValidCoords &&
-    (addressLoading || weatherLoading || address == null || weather === null)
+    isValidCoords && (addressLoading || weatherLoading || address == null || weather === null)
 
   const showSkeleton = useMinimumLoadingState(isPending, SKELETON_MIN_MS)
 
@@ -159,4 +162,3 @@ export function WeatherDetailPage({ lat, lon, favoriteId: favoriteIdProp }: Weat
     </main>
   )
 }
-
