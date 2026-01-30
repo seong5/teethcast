@@ -25,7 +25,7 @@ const SKELETON_MIN_MS = 200
 
 export function HomePage() {
   const searchContainerRef = useRef<HTMLDivElement>(null)
-  const { position, error, isLoading, getCurrentPosition } = useGeolocation()
+  const { position, error, isLoading } = useGeolocation()
   const {
     address,
     error: addressError,
@@ -72,11 +72,6 @@ export function HomePage() {
     setSearchValue('')
     clearResults()
   })
-
-  useEffect(() => {
-    // 페이지 로드 시 자동으로 현재 위치 감지
-    getCurrentPosition()
-  }, [getCurrentPosition])
 
   useEffect(() => {
     if (position) {
