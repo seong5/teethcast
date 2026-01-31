@@ -57,7 +57,7 @@ export default function FavoriteCard({ favorite }: FavoriteCardProps) {
   return (
     <div
       onClick={handleClick}
-      className="relative w-full cursor-pointer overflow-hidden rounded-2xl border border-gray-100 bg-white p-3 shadow-xl transition-shadow hover:shadow-2xl dark:border-gray-700 dark:bg-gray-800 md:rounded-3xl md:p-4"
+      className="relative w-full cursor-pointer overflow-hidden rounded-2xl border border-sky-100 bg-sky-50 p-3 shadow-xl transition-shadow hover:shadow-2xl dark:border-gray-700 dark:bg-gray-800 md:rounded-3xl md:p-4"
       role="button"
       tabIndex={0}
       onKeyDown={(e) => {

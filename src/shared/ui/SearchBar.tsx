@@ -17,7 +17,7 @@ export default function SearchBar({
 }: SearchBarProps) {
   return (
     <div
-      className={`flex flex-col items-center gap-3 rounded-2xl border border-slate-100 bg-white p-4 shadow-xl shadow-slate-200/20 dark:border-gray-700 dark:bg-gray-800 dark:shadow-gray-900/20 sm:gap-4 sm:rounded-3xl sm:p-6 md:flex-row ${className}`}
+      className={`flex flex-col items-center gap-3 rounded-2xl border border-primary bg-white p-4 shadow-xl shadow-slate-200/20 dark:border-gray-700 dark:bg-gray-800 dark:shadow-gray-900/20 sm:gap-4 sm:rounded-3xl sm:p-6 md:flex-row ${className}`}
       role="search"
       aria-label="검색"
     >
