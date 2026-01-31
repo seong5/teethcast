@@ -9,7 +9,6 @@ dayjs.extend(timezone)
 
 const KST = 'Asia/Seoul'
 
-/** 현재 시각을 한국 시간(KST) 기준으로 반환 */
 function nowKst() {
   return dayjs.tz(undefined, KST)
 }
@@ -77,8 +76,7 @@ export async function fetchWeatherDataServer(
   latitude: number,
   longitude: number,
 ): Promise<WeatherData> {
-  const apiKey =
-    process.env.WEATHER_API_KEY || process.env.NEXT_PUBLIC_WEATHER_API_KEY
+  const apiKey = process.env.WEATHER_API_KEY || process.env.NEXT_PUBLIC_WEATHER_API_KEY
   if (!apiKey) {
     throw new Error('기상청 API 키가 설정되지 않았습니다.')
   }
@@ -86,6 +84,11 @@ export async function fetchWeatherDataServer(
   const { nx, ny } = convertLatLonToGrid(latitude, longitude)
   const { baseDate: ultraBaseDate, baseTime: ultraBaseTime } = getUltraSrtBaseTime()
   const { baseDate: vilageBaseDate, baseTime: vilageBaseTime } = getVilageBaseTime()
+
+  const nowForFetch = nowKst()
+  const todayStr = nowForFetch.format('YYYYMMDD')
+  // 오늘 TMN/TMX는 14시 등 늦은 base에는 없고, 02시 발표본에 있을 수 있음 → 02시 발표 추가 요청
+  const shouldFetch0200 = nowForFetch.hour() >= 3
 
   const baseParams = {
     serviceKey: decodeURIComponent(apiKey),
@@ -97,26 +100,47 @@ export async function fetchWeatherDataServer(
     ny,
   }
 
-  const [currentRes, forecastRes, dailyRes] = await Promise.all([
-    fetch(
-      buildKmaUrl('getUltraSrtNcst', { ...baseParams, numOfRows: 10 }),
-    ),
-    fetch(
-      buildKmaUrl('getUltraSrtFcst', { ...baseParams, numOfRows: 60 }),
-    ),
+  const vilageFcstParams = {
+    serviceKey: decodeURIComponent(apiKey),
+    pageNo: 1,
+    numOfRows: 900,
+    dataType: 'JSON',
+    nx,
+    ny,
+  }
+
+  const allRes = await Promise.all([
+    fetch(buildKmaUrl('getUltraSrtNcst', { ...baseParams, numOfRows: 10 })),
+    fetch(buildKmaUrl('getUltraSrtFcst', { ...baseParams, numOfRows: 60 })),
     fetch(
       buildKmaUrl('getVilageFcst', {
-        serviceKey: decodeURIComponent(apiKey),
-        pageNo: 1,
-        numOfRows: 100,
-        dataType: 'JSON',
+        ...vilageFcstParams,
         base_date: vilageBaseDate,
         base_time: vilageBaseTime,
-        nx,
-        ny,
       }),
     ),
+    ...(shouldFetch0200
+      ? [
+          fetch(
+            buildKmaUrl('getVilageFcst', {
+              ...vilageFcstParams,
+              base_date: todayStr,
+              base_time: '0200',
+            }),
+          ),
+        ]
+      : []),
   ])
+  const currentRes = allRes[0]
+  const forecastRes = allRes[1]
+  const dailyRes = allRes[2]
+  const dailyRes0200 = allRes[3] ?? null
+
+  if (!dailyRes.ok) {
+    throw new Error(
+      `단기예보 API(getVilageFcst) 호출 실패: HTTP ${dailyRes.status} ${dailyRes.statusText}`,
+    )
+  }
 
   const [currentData, forecastData, dailyData] = await Promise.all([
     currentRes.json() as Promise<KMAResponse>,
@@ -140,7 +164,27 @@ export async function fetchWeatherDataServer(
 
   const currentItems = currentData.response?.body?.items?.item ?? []
   const forecastItems = forecastData.response?.body?.items?.item ?? []
-  const dailyItems = dailyData.response?.body?.items?.item ?? []
+  const dailyItemsRaw = dailyData.response?.body?.items?.item
+  // API가 항목 1개일 때 객체로 반환하는 경우 대비
+  const dailyItems = Array.isArray(dailyItemsRaw)
+    ? dailyItemsRaw
+    : dailyItemsRaw != null
+      ? [dailyItemsRaw]
+      : []
+
+  // 02시 발표본에서 오늘 TMN/TMX 추출 (있으면 병합)
+  let dailyItems0200: KMAItem[] = []
+  if (dailyRes0200?.ok) {
+    try {
+      const data0200 = (await dailyRes0200.json()) as KMAResponse
+      if (data0200.response?.header?.resultCode === '00') {
+        const raw = data0200.response?.body?.items?.item
+        dailyItems0200 = Array.isArray(raw) ? raw : raw != null ? [raw] : []
+      }
+    } catch {
+      // 02시 응답 파싱 실패 시 무시
+    }
+  }
 
   if (currentItems.length === 0) throw new Error('초단기실황 데이터를 찾을 수 없습니다.')
   if (forecastItems.length === 0) throw new Error('초단기예보 데이터를 찾을 수 없습니다.')
@@ -175,37 +219,30 @@ export async function fetchWeatherDataServer(
   const forecastTime = getClosestForecastTime(forecastItems)
   const skyMap: Record<number, string> = { 1: '맑음', 3: '구름많음', 4: '흐림' }
   const ptyMap: Record<number, string> = {
-    0: '없음', 1: '비', 2: '비/눈', 3: '눈', 4: '소나기',
+    0: '없음',
+    1: '비',
+    2: '비/눈',
+    3: '눈',
+    4: '소나기',
   }
 
   const temperatureItem = currentItems.find((i) => i.category === 'T1H')
-  const temperatureValue =
-    temperatureItem?.obsrValue ?? temperatureItem?.fcstValue
+  const temperatureValue = temperatureItem?.obsrValue ?? temperatureItem?.fcstValue
   const temperature = safeParseFloat(temperatureValue, 0)
 
   const humidityItem = currentItems.find((i) => i.category === 'REH')
-  const humidity = safeParseFloat(
-    humidityItem?.obsrValue ?? humidityItem?.fcstValue,
-    0,
-  )
+  const humidity = safeParseFloat(humidityItem?.obsrValue ?? humidityItem?.fcstValue, 0)
 
-  const skyItems = forecastItems.filter(
-    (i) => i.category === 'SKY' && i.fcstTime === forecastTime,
-  )
+  const skyItems = forecastItems.filter((i) => i.category === 'SKY' && i.fcstTime === forecastTime)
   const skyCode = safeParseInt(skyItems[0]?.fcstValue, 1)
   const sky = skyMap[skyCode] ?? '맑음'
 
-  const ptyItems = forecastItems.filter(
-    (i) => i.category === 'PTY' && i.fcstTime === forecastTime,
-  )
+  const ptyItems = forecastItems.filter((i) => i.category === 'PTY' && i.fcstTime === forecastTime)
   const ptyCode = safeParseInt(ptyItems[0]?.fcstValue, 0)
   const precipitation = ptyMap[ptyCode] ?? '없음'
 
   const windItem = currentItems.find((i) => i.category === 'WSD')
-  const windSpeed = safeParseFloat(
-    windItem?.obsrValue ?? windItem?.fcstValue,
-    0,
-  )
+  const windSpeed = safeParseFloat(windItem?.obsrValue ?? windItem?.fcstValue, 0)
 
   const today = nowKst().format('YYYYMMDD')
   const tomorrow = nowKst().add(1, 'day').format('YYYYMMDD')
@@ -219,35 +256,47 @@ export async function fetchWeatherDataServer(
     return d.format('MM/DD')
   }
 
-  const minTempItems = dailyItems.filter((i) => i.category === 'TMN')
-  const minTempItem =
-    minTempItems.find((i) => i.baseTime === '0200' && i.fcstDate === today) ??
-    minTempItems.find((i) => i.baseTime === '0200' && i.fcstDate === tomorrow) ??
-    minTempItems.find((i) => i.baseTime === '0500' && i.fcstDate === today) ??
-    minTempItems.find((i) => i.baseTime === '0500' && i.fcstDate === tomorrow) ??
-    minTempItems.find((i) => i.fcstDate === today) ??
-    minTempItems.find((i) => i.fcstDate === tomorrow) ??
-    minTempItems[0]
+  // 메인 발표 + 02시 발표(오늘 TMN/TMX 있을 수 있음) 합침
+  const todayTmn0200 = dailyItems0200.filter(
+    (i) => i.category === 'TMN' && i.fcstDate === todayStr,
+  )
+  const todayTmx0200 = dailyItems0200.filter(
+    (i) => i.category === 'TMX' && i.fcstDate === todayStr,
+  )
+  const minTempItems = [
+    ...dailyItems.filter((i) => i.category === 'TMN'),
+    ...todayTmn0200,
+  ]
+  const maxTempItems = [
+    ...dailyItems.filter((i) => i.category === 'TMX'),
+    ...todayTmx0200,
+  ]
 
-  const parsedMinTemp = minTempItem?.fcstValue
-    ? safeParseFloat(minTempItem.fcstValue, temperature - 5)
-    : temperature - 5
-  const minTemp = parsedMinTemp > temperature ? temperature - 2 : parsedMinTemp
+  // 오늘 날짜 TMN/TMX: API는 오늘의 TMN/TMX를 주지 않고 내일·모레만 주는 경우가 있음 → 오늘은 TMP(시간별 기온)로 계산
+  const todayMinTempValues = minTempItems
+    .filter((i) => i.fcstDate === today)
+    .map((i) => safeParseFloat(i.fcstValue, Number.NaN))
+    .filter((v) => !Number.isNaN(v))
+  const todayMaxTempValues = maxTempItems
+    .filter((i) => i.fcstDate === today)
+    .map((i) => safeParseFloat(i.fcstValue, Number.NaN))
+    .filter((v) => !Number.isNaN(v))
 
-  const maxTempItems = dailyItems.filter((i) => i.category === 'TMX')
-  const maxTempItem =
-    maxTempItems.find((i) => i.baseTime === '0200' && i.fcstDate === today) ??
-    maxTempItems.find((i) => i.baseTime === '0200' && i.fcstDate === tomorrow) ??
-    maxTempItems.find((i) => i.baseTime === '0500' && i.fcstDate === today) ??
-    maxTempItems.find((i) => i.baseTime === '0500' && i.fcstDate === tomorrow) ??
-    maxTempItems.find((i) => i.fcstDate === today) ??
-    maxTempItems.find((i) => i.fcstDate === tomorrow) ??
-    maxTempItems[0]
-
-  const parsedMaxTemp = maxTempItem?.fcstValue
-    ? safeParseFloat(maxTempItem.fcstValue, temperature + 5)
-    : temperature + 5
-  const maxTemp = parsedMaxTemp < temperature ? temperature + 2 : parsedMaxTemp
+  let minTemp: number
+  let maxTemp: number
+  if (todayMinTempValues.length > 0 && todayMaxTempValues.length > 0) {
+    minTemp = Math.min(...todayMinTempValues)
+    maxTemp = Math.max(...todayMaxTempValues)
+  } else {
+    // 오늘 TMN/TMX 없음 → 단기예보 오늘 TMP(시간별 기온) min/max + 현재기온 포함
+    const todayTmpValues = dailyItems
+      .filter((i) => i.category === 'TMP' && i.fcstDate === today)
+      .map((i) => safeParseFloat(i.fcstValue, Number.NaN))
+      .filter((v) => !Number.isNaN(v))
+    const allTemps = todayTmpValues.length > 0 ? [temperature, ...todayTmpValues] : [temperature]
+    minTemp = Math.min(...allTemps)
+    maxTemp = Math.max(...allTemps)
+  }
 
   const dailyWeather: DailyWeather[] = []
   const forecastDates = [today, tomorrow, dayAfterTomorrow]
@@ -282,10 +331,7 @@ export async function fetchWeatherDataServer(
     })
     const mostCommonSkyCode =
       Object.keys(skyCodeCounts).length > 0
-        ? parseInt(
-            Object.entries(skyCodeCounts).sort((a, b) => b[1] - a[1])[0][0],
-            10,
-          )
+        ? parseInt(Object.entries(skyCodeCounts).sort((a, b) => b[1] - a[1])[0][0], 10)
         : 1
     const dateSky = skyMap[mostCommonSkyCode] ?? '맑음'
 
@@ -304,10 +350,7 @@ export async function fetchWeatherDataServer(
     })
     const mostCommonPtyCode =
       Object.keys(ptyCodeCounts).length > 0
-        ? parseInt(
-            Object.entries(ptyCodeCounts).sort((a, b) => b[1] - a[1])[0][0],
-            10,
-          )
+        ? parseInt(Object.entries(ptyCodeCounts).sort((a, b) => b[1] - a[1])[0][0], 10)
         : 0
     const datePrecipitation = ptyMap[mostCommonPtyCode] ?? '없음'
 

@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { apiClient, getApiErrorMessage } from '@/shared/api'
 import type { KakaoSearchResponse } from '@/shared/types/kakao'
 import { isKakaoSearchResponse } from '@/shared/types/guards'
 import { QUERY_CONFIG } from '@/shared/config/query'
@@ -13,23 +14,25 @@ export interface Coordinates {
 
 // 카카오 키워드 검색 API 호출 함수
 async function fetchKakaoSearch(query: string): Promise<KakaoSearchResponse> {
-  const response = await fetch(`/api/kakao-search?query=${encodeURIComponent(query)}`)
+  try {
+    const { data } = await apiClient.get<unknown>(
+      `/api/kakao-search?query=${encodeURIComponent(query)}`,
+    )
 
-  if (!response.ok) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const errorData = (await response.json().catch(() => ({}))) as { error?: string }
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    throw new Error(errorData.error || `HTTP 오류: ${response.status}`)
+    if (!isKakaoSearchResponse(data)) {
+      throw new Error('카카오 API 응답 형식이 올바르지 않습니다.')
+    }
+
+    return data
+  } catch (err) {
+    if (
+      err instanceof Error &&
+      err.message === '카카오 API 응답 형식이 올바르지 않습니다.'
+    ) {
+      throw err
+    }
+    throw new Error(getApiErrorMessage(err))
   }
-
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  const data = (await response.json()) as unknown
-
-  if (!isKakaoSearchResponse(data)) {
-    throw new Error('카카오 API 응답 형식이 올바르지 않습니다.')
-  }
-
-  return data
 }
 
 // 응답에서 좌표 추출
