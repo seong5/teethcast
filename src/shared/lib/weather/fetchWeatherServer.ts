@@ -1,3 +1,4 @@
+import axios from 'axios'
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
@@ -109,44 +110,30 @@ export async function fetchWeatherDataServer(
     ny,
   }
 
+  const vilageFcstUrl = (baseDate: string, baseTime: string) =>
+    buildKmaUrl('getVilageFcst', { ...vilageFcstParams, base_date: baseDate, base_time: baseTime })
+
   const allRes = await Promise.all([
-    fetch(buildKmaUrl('getUltraSrtNcst', { ...baseParams, numOfRows: 10 })),
-    fetch(buildKmaUrl('getUltraSrtFcst', { ...baseParams, numOfRows: 60 })),
-    fetch(
-      buildKmaUrl('getVilageFcst', {
-        ...vilageFcstParams,
-        base_date: vilageBaseDate,
-        base_time: vilageBaseTime,
-      }),
-    ),
+    axios.get<KMAResponse>(buildKmaUrl('getUltraSrtNcst', { ...baseParams, numOfRows: 10 })),
+    axios.get<KMAResponse>(buildKmaUrl('getUltraSrtFcst', { ...baseParams, numOfRows: 60 })),
+    axios.get<KMAResponse>(vilageFcstUrl(vilageBaseDate, vilageBaseTime)),
     ...(shouldFetch0200
       ? [
-          fetch(
-            buildKmaUrl('getVilageFcst', {
-              ...vilageFcstParams,
-              base_date: todayStr,
-              base_time: '0200',
-            }),
-          ),
+          axios
+            .get<KMAResponse>(vilageFcstUrl(todayStr, '0200'))
+            .catch(() => ({ data: null as KMAResponse | null })),
         ]
       : []),
   ])
-  const currentRes = allRes[0]
-  const forecastRes = allRes[1]
-  const dailyRes = allRes[2]
-  const dailyRes0200 = allRes[3] ?? null
 
-  if (!dailyRes.ok) {
-    throw new Error(
-      `단기예보 API(getVilageFcst) 호출 실패: HTTP ${dailyRes.status} ${dailyRes.statusText}`,
-    )
+  const currentData = allRes[0].data
+  const forecastData = allRes[1].data
+  const dailyData = allRes[2].data
+  const dailyData0200 = allRes[3]?.data ?? null
+
+  if (!dailyData?.response?.header) {
+    throw new Error('단기예보 API(getVilageFcst) 호출 실패: 응답 형식이 올바르지 않습니다.')
   }
-
-  const [currentData, forecastData, dailyData] = await Promise.all([
-    currentRes.json() as Promise<KMAResponse>,
-    forecastRes.json() as Promise<KMAResponse>,
-    dailyRes.json() as Promise<KMAResponse>,
-  ])
 
   const currentHeader = currentData.response?.header
   const forecastHeader = forecastData.response?.header
@@ -174,16 +161,9 @@ export async function fetchWeatherDataServer(
 
   // 02시 발표본에서 오늘 TMN/TMX 추출 (있으면 병합)
   let dailyItems0200: KMAItem[] = []
-  if (dailyRes0200?.ok) {
-    try {
-      const data0200 = (await dailyRes0200.json()) as KMAResponse
-      if (data0200.response?.header?.resultCode === '00') {
-        const raw = data0200.response?.body?.items?.item
-        dailyItems0200 = Array.isArray(raw) ? raw : raw != null ? [raw] : []
-      }
-    } catch {
-      // 02시 응답 파싱 실패 시 무시
-    }
+  if (dailyData0200?.response?.header?.resultCode === '00') {
+    const raw = dailyData0200.response?.body?.items?.item
+    dailyItems0200 = Array.isArray(raw) ? raw : raw != null ? [raw] : []
   }
 
   if (currentItems.length === 0) throw new Error('초단기실황 데이터를 찾을 수 없습니다.')
@@ -264,7 +244,7 @@ export async function fetchWeatherDataServer(
   const minTempItems = [...dailyItems.filter((i) => i.category === 'TMN'), ...todayTmn0200]
   const maxTempItems = [...dailyItems.filter((i) => i.category === 'TMX'), ...todayTmx0200]
 
-  // 오늘 날짜 TMN/TMX: API는 오늘의 TMN/TMX를 주지 않고 내일·모레만 주는 경우가 있음 → 오늘은 TMP(시간별 기온)로 계산
+  // 오늘 날짜 TMN/TMX: API는 오늘의 TMN/TMX를 주지 않고 내일,모레만 주는 경우가 있음 → 오늘은 TMP(시간별 기온)로 계산
   const todayMinTempValues = minTempItems
     .filter((i) => i.fcstDate === today)
     .map((i) => safeParseFloat(i.fcstValue, Number.NaN))
@@ -280,7 +260,6 @@ export async function fetchWeatherDataServer(
     minTemp = Math.min(...todayMinTempValues)
     maxTemp = Math.max(...todayMaxTempValues)
   } else {
-    // 오늘 TMN/TMX 없음 → 단기예보 오늘 TMP(시간별 기온) min/max + 현재기온 포함
     const todayTmpValues = dailyItems
       .filter((i) => i.category === 'TMP' && i.fcstDate === today)
       .map((i) => safeParseFloat(i.fcstValue, Number.NaN))

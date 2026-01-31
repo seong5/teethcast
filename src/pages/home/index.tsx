@@ -42,8 +42,6 @@ export function HomePage() {
     (position != null && (address == null || weather === null))
 
   const showSkeleton = useMinimumLoadingState(isPending, SKELETON_MIN_MS)
-
-  // 현재 위치가 즐겨찾기와 coarse 매칭되면 해당 id를 넘겨서 별 버튼이 일관되게 동작하도록 함
   const favorites = useFavoritesStore((state) => state.favorites)
   const favoriteIdOverride = useMemo(() => {
     if (position == null) return undefined
@@ -54,7 +52,6 @@ export function HomePage() {
     return matched?.id
   }, [position, favorites])
 
-  // 검색 기능
   const {
     searchValue,
     setSearchValue,
