@@ -248,29 +248,21 @@ export async function fetchWeatherDataServer(
   const tomorrow = nowKst().add(1, 'day').format('YYYYMMDD')
   const dayAfterTomorrow = nowKst().add(2, 'day').format('YYYYMMDD')
 
+  const weekdaysKo = ['일', '월', '화', '수', '목', '금', '토']
   const getDateLabel = (dateStr: string, index: number): string => {
     const d = dayjs(dateStr, 'YYYYMMDD')
-    if (index === 0) return '오늘'
-    if (index === 1) return '내일'
-    if (index === 2) return '모레'
-    return d.format('MM/DD')
+    const dayOfWeek = weekdaysKo[d.day()]
+    if (index === 0) return `오늘 (${dayOfWeek})`
+    if (index === 1) return `내일 (${dayOfWeek})`
+    if (index === 2) return `모레 (${dayOfWeek})`
+    return `${d.format('MM/DD')} (${dayOfWeek})`
   }
 
   // 메인 발표 + 02시 발표(오늘 TMN/TMX 있을 수 있음) 합침
-  const todayTmn0200 = dailyItems0200.filter(
-    (i) => i.category === 'TMN' && i.fcstDate === todayStr,
-  )
-  const todayTmx0200 = dailyItems0200.filter(
-    (i) => i.category === 'TMX' && i.fcstDate === todayStr,
-  )
-  const minTempItems = [
-    ...dailyItems.filter((i) => i.category === 'TMN'),
-    ...todayTmn0200,
-  ]
-  const maxTempItems = [
-    ...dailyItems.filter((i) => i.category === 'TMX'),
-    ...todayTmx0200,
-  ]
+  const todayTmn0200 = dailyItems0200.filter((i) => i.category === 'TMN' && i.fcstDate === todayStr)
+  const todayTmx0200 = dailyItems0200.filter((i) => i.category === 'TMX' && i.fcstDate === todayStr)
+  const minTempItems = [...dailyItems.filter((i) => i.category === 'TMN'), ...todayTmn0200]
+  const maxTempItems = [...dailyItems.filter((i) => i.category === 'TMX'), ...todayTmx0200]
 
   // 오늘 날짜 TMN/TMX: API는 오늘의 TMN/TMX를 주지 않고 내일·모레만 주는 경우가 있음 → 오늘은 TMP(시간별 기온)로 계산
   const todayMinTempValues = minTempItems
@@ -368,6 +360,7 @@ export async function fetchWeatherDataServer(
     dailyWeather.push({
       date: dayjs(forecastDate, 'YYYYMMDD').format('YYYY-MM-DD'),
       dateLabel: getDateLabel(forecastDate, i),
+      dayOfWeek: weekdaysKo[dayjs(forecastDate, 'YYYYMMDD').day()],
       minTemp: dateMinTemp,
       maxTemp: dateMaxTemp,
       sky: dateSky,

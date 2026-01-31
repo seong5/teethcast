@@ -12,9 +12,9 @@ export default function DailyWeatherSkeleton() {
           key={i}
           className="flex flex-col items-center gap-2 rounded-xl p-3 bg-gray-50 dark:bg-gray-700/50 border border-transparent min-h-[72px] sm:flex-row sm:items-center sm:justify-between sm:gap-4 md:rounded-2xl md:p-4 md:flex-1 md:min-h-[80px]"
         >
-          <div className="flex items-center gap-3 flex-1 min-w-0 sm:gap-4 w-full sm:w-auto">
-            <div className="flex-shrink-0 text-center sm:text-left">
-              <div className="h-3.5 w-10 md:h-4 md:w-12">
+          <div className="flex items-center gap-3 flex-1 min-w-0 sm:gap-4">
+            <div className="flex-shrink-0 text-center sm:text-left min-w-0">
+              <div className="h-3 w-14 md:h-4 md:w-16">
                 <Skeleton variant="bar" className="h-full w-full" />
               </div>
               <div className="h-2.5 w-8 mt-0.5 md:h-3 md:w-10">
@@ -22,18 +22,22 @@ export default function DailyWeatherSkeleton() {
               </div>
             </div>
             <Skeleton variant="circle" className="h-10 w-10 flex-shrink-0" />
-            <div className="h-3 flex-1 min-w-0 max-w-[80px] md:h-4 md:max-w-[100px]">
-              <Skeleton variant="bar" className="h-full w-full" />
+            <div className="flex-1 min-w-0 text-center sm:text-left">
+              <div className="h-3 w-full max-w-[80px] mx-auto md:h-4 md:max-w-[100px] md:mx-0 md:ml-0">
+                <Skeleton variant="bar" className="h-full w-full" />
+              </div>
             </div>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0 sm:gap-3">
             <div className="text-center sm:text-right">
-              <Skeleton variant="bar" className="h-3 w-8 mb-1 md:w-10" />
+              <Skeleton variant="bar" className="h-3 w-8 mb-1 md:h-4 md:w-10" />
               <Skeleton variant="bar" className="h-5 w-10 rounded md:h-6 md:w-12" />
             </div>
-            <div className="w-2 shrink-0" aria-hidden />
+            <div className="text-gray-300 dark:text-gray-600" aria-hidden>
+              /
+            </div>
             <div className="text-center sm:text-right">
-              <Skeleton variant="bar" className="h-3 w-8 mb-1 md:w-10" />
+              <Skeleton variant="bar" className="h-3 w-8 mb-1 md:h-4 md:w-10" />
               <Skeleton variant="bar" className="h-5 w-10 rounded md:h-6 md:w-12" />
             </div>
           </div>
