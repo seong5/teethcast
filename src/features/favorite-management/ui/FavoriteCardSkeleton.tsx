@@ -4,7 +4,7 @@ import { Skeleton } from '@/shared/ui'
 
 export default function FavoriteCardSkeleton() {
   return (
-    <div className="relative w-full overflow-hidden rounded-2xl border border-gray-100 bg-white p-3 shadow-xl dark:border-gray-700 dark:bg-gray-800 md:rounded-3xl md:p-4">
+    <div className="relative w-full overflow-hidden rounded-2xl border border-sky-100 bg-sky-50 p-3 shadow-xl dark:border-gray-700 dark:bg-gray-800 md:rounded-3xl md:p-4">
       <div className="flex flex-col gap-3 md:gap-4">
         <div className="flex items-center gap-2 min-w-0 min-h-10 md:min-h-12">
           <div className="flex items-center gap-1.5 min-w-0 flex-1">

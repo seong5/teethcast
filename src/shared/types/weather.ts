@@ -12,7 +12,8 @@ export interface HourlyWeather {
 /* 일별 날씨 정보 */
 export interface DailyWeather {
   date: string // 날짜 (예: "2026-01-28")
-  dateLabel: string // 날짜 라벨 (예: "오늘", "내일", "모레", "01/28")
+  dateLabel: string // 날짜 라벨 (예: "오늘 (토)", "내일 (일)")
+  dayOfWeek: string // 요일 한 글자 (일, 월, 화, 수, 목, 금, 토) — 주말 색상용
   minTemp: number // 최저기온
   maxTemp: number // 최고기온
   sky: string // 하늘상태 (맑음, 구름많음, 흐림)

@@ -20,9 +20,27 @@ export default function DailyWeatherCard({ daily }: DailyWeatherCardProps) {
           className="flex flex-col items-center gap-2 rounded-xl p-3 bg-gray-50 dark:bg-gray-700/50 border border-transparent min-h-[72px] sm:flex-row sm:items-center sm:justify-between sm:gap-4 md:rounded-2xl md:p-4 md:flex-1 md:min-h-[80px]"
         >
             <div className="flex items-center gap-3 flex-1 min-w-0 sm:gap-4">
-              <div className="flex-shrink-0 text-center sm:text-left">
-                <div className="text-xs font-bold text-gray-900 dark:text-white min-w-[2.5rem] md:text-sm md:min-w-[3rem]">
-                  {day.dateLabel}
+              <div className="flex-shrink-0 text-center sm:text-left min-w-0">
+                <div className="text-xs font-bold text-gray-900 dark:text-white whitespace-nowrap md:text-sm">
+                  {(() => {
+                  const suffix = ` (${day.dayOfWeek})`
+                  return day.dateLabel.endsWith(suffix)
+                    ? day.dateLabel.slice(0, -suffix.length).trim()
+                    : day.dateLabel
+                })()}
+                  {' ('}
+                  <span
+                    className={
+                      day.dayOfWeek === '일'
+                        ? 'text-red-500 dark:text-red-400'
+                        : day.dayOfWeek === '토'
+                          ? 'text-blue-500 dark:text-blue-400'
+                          : undefined
+                    }
+                  >
+                    {day.dayOfWeek}
+                  </span>
+                  {')'}
                 </div>
                 <div className="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5 md:text-xs">
                   {day.date.split('-').slice(1).join('/')}

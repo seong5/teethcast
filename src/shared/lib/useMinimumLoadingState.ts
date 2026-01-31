@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from 'react'
 
-/* 로딩 상태가 true였을 때 최소 minMs 동안은 true를 유지합니다. */
 export function useMinimumLoadingState(loading: boolean, minMs: number): boolean {
   const [showLoading, setShowLoading] = useState(loading)
   const startTimeRef = useRef<number | null>(null)

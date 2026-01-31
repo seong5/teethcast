@@ -44,7 +44,7 @@ export default function WeatherCard({
         <div className="relative flex flex-col items-center gap-4 text-center flex-1 justify-center md:gap-6">
           {address && (
             <div className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 line-clamp-2 md:text-sm md:mb-2">
-              {address}
+              현재위치 : {address}
             </div>
           )}
           <div className="flex flex-col items-center gap-2 md:gap-3">

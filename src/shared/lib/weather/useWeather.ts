@@ -3,6 +3,7 @@
 import { useState, useCallback } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { QUERY_CONFIG } from '@/shared/config/query'
+import { apiClient, getApiErrorMessage } from '@/shared/api'
 import type { WeatherData } from '@/shared/types/weather'
 
 export interface UseWeatherReturn {
@@ -13,12 +14,12 @@ export interface UseWeatherReturn {
 }
 
 async function fetchWeatherFromApi(lat: number, lon: number): Promise<WeatherData> {
-  const res = await fetch(`/api/weather?lat=${lat}&lon=${lon}`)
-  if (!res.ok) {
-    const err = (await res.json().catch(() => ({}))) as { error?: string }
-    throw new Error(err.error ?? res.statusText)
+  try {
+    const { data } = await apiClient.get<WeatherData>(`/api/weather?lat=${lat}&lon=${lon}`)
+    return data
+  } catch (err) {
+    throw new Error(getApiErrorMessage(err))
   }
-  return res.json() as Promise<WeatherData>
 }
 
 /* 기상청 API로 날씨 정보를 가져오는 Hook */

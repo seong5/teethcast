@@ -17,13 +17,13 @@ export const QUERY_CONFIG = {
     gcTime: 30 * MINUTE,
   },
 
-  // 카카오 검색 쿼리 설정 (좌표 검색)
+  // 카카오 검색 쿼리 설정
   kakaoSearch: {
     staleTime: HOUR,
     gcTime: DAY,
   },
 
-  // 역지오코딩 쿼리 설정 (좌표 → 주소)
+  // 역지오코딩 쿼리 설정
   reverseGeocoding: {
     staleTime: HOUR,
     gcTime: DAY,
@@ -36,7 +36,7 @@ export const QUERY_CONFIG = {
     retry: 0,
   },
 
-  // 기본 쿼리 설정 (QueryProvider에서 사용)
+  // 기본 쿼리 설정
   default: {
     staleTime: 5 * MINUTE,
     gcTime: 10 * MINUTE,

@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { apiClient, getApiErrorMessage } from '@/shared/api'
 import type { KakaoRegionCodeResponse } from '@/shared/types/kakao'
 import { isKakaoRegionCodeResponse } from '@/shared/types/guards'
 import { QUERY_CONFIG } from '@/shared/config/query'
@@ -25,23 +26,25 @@ async function fetchReverseGeocoding(
   latitude: number,
   longitude: number,
 ): Promise<KakaoRegionCodeResponse> {
-  const response = await fetch(`/api/reverse-geocoding?latitude=${latitude}&longitude=${longitude}`)
+  try {
+    const { data } = await apiClient.get<unknown>(
+      `/api/reverse-geocoding?latitude=${latitude}&longitude=${longitude}`,
+    )
 
-  if (!response.ok) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const errorData = (await response.json().catch(() => ({}))) as { error?: string }
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    throw new Error(errorData.error || `HTTP 오류: ${response.status}`)
+    if (!isKakaoRegionCodeResponse(data)) {
+      throw new Error('카카오 API 응답 형식이 올바르지 않습니다.')
+    }
+
+    return data
+  } catch (err) {
+    if (
+      err instanceof Error &&
+      err.message === '카카오 API 응답 형식이 올바르지 않습니다.'
+    ) {
+      throw err
+    }
+    throw new Error(getApiErrorMessage(err))
   }
-
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  const data = (await response.json()) as unknown
-
-  if (!isKakaoRegionCodeResponse(data)) {
-    throw new Error('카카오 API 응답 형식이 올바르지 않습니다.')
-  }
-
-  return data
 }
 
 // 응답 데이터를 Address로 변환
