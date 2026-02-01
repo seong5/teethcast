@@ -42,7 +42,7 @@ export default function HourlyWeatherCard({ hourly }: HourlyWeatherCardProps) {
               {hourlyItem.precipitation !== '없음' && (
                 <div className="flex items-center justify-center">
                   <div className="inline-block px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/40">
-                    <div className="text-[10px] font-bold text-blue-600 dark:text-blue-300">
+                    <div className="text-xs font-bold text-blue-600 dark:text-blue-300 md:text-sm">
                       {hourlyItem.precipitation}
                     </div>
                   </div>
