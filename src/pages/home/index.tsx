@@ -114,6 +114,7 @@ export function HomePage() {
                 </div>
               ) : (
                 <SearchResults
+                  key={searchValue}
                   results={searchResults}
                   onSelect={handleSelectLocation}
                   isLoading={searchLoading}

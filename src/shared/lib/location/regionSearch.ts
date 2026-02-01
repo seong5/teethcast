@@ -15,7 +15,7 @@ export async function loadRegions(): Promise<HierarchicalRegions> {
   try {
     const data = await fetchAPIWithGuard<HierarchicalRegions>(
       '/data/regions.json',
-      isHierarchicalRegions,
+      isHierarchicalRegions
     )
 
     regionsCache = data
@@ -27,7 +27,7 @@ export async function loadRegions(): Promise<HierarchicalRegions> {
 }
 
 function formatSearchResults(
-  results: Array<{ sido: string; sigungu: string; dong?: string }>,
+  results: Array<{ sido: string; sigungu: string; dong?: string }>
 ): string[] {
   return results.map((r) => {
     const parts = [r.sido, r.sigungu]
@@ -51,16 +51,24 @@ export function searchRegions(query: string, regions: HierarchicalRegions): stri
         results.push({ sido: word, sigungu })
       })
     } else {
+      const wordLower = word.toLowerCase()
+      Object.keys(regions).forEach((sido) => {
+        if (sido.toLowerCase().includes(wordLower)) {
+          Object.keys(regions[sido]).forEach((sigungu) => {
+            results.push({ sido, sigungu })
+          })
+        }
+      })
       Object.keys(regions).forEach((sido) => {
         Object.keys(regions[sido]).forEach((sigungu) => {
-          if (sigungu.toLowerCase().includes(word.toLowerCase())) {
+          if (sigungu.toLowerCase().includes(wordLower)) {
             results.push({ sido, sigungu })
             regions[sido][sigungu].forEach((dong) => {
               results.push({ sido, sigungu, dong })
             })
           } else {
             regions[sido][sigungu].forEach((dong) => {
-              if (dong.toLowerCase().includes(word.toLowerCase())) {
+              if (dong.toLowerCase().includes(wordLower)) {
                 results.push({ sido, sigungu, dong })
               }
             })
@@ -132,14 +140,14 @@ export function searchRegions(query: string, regions: HierarchicalRegions): stri
         (item) =>
           item.sido === current.sido &&
           item.sigungu === current.sigungu &&
-          item.dong === current.dong,
+          item.dong === current.dong
       )
       if (!exists) {
         acc.push(current)
       }
       return acc
     },
-    [] as Array<{ sido: string; sigungu: string; dong?: string }>,
+    [] as Array<{ sido: string; sigungu: string; dong?: string }>
   )
 
   const queryLowerForSort = trimmed.toLowerCase()
@@ -155,7 +163,7 @@ export function searchRegions(query: string, regions: HierarchicalRegions): stri
     return 0
   })
 
-  const limitedResults = uniqueResults.slice(0, 10)
+  const limitedResults = uniqueResults.slice(0, 100)
 
   if (limitedResults.length === 0) {
     return ['해당 장소의 정보가 제공되지 않습니다.']
