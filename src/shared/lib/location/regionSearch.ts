@@ -51,16 +51,24 @@ export function searchRegions(query: string, regions: HierarchicalRegions): stri
         results.push({ sido: word, sigungu })
       })
     } else {
+      const wordLower = word.toLowerCase()
+      Object.keys(regions).forEach((sido) => {
+        if (sido.toLowerCase().includes(wordLower)) {
+          Object.keys(regions[sido]).forEach((sigungu) => {
+            results.push({ sido, sigungu })
+          })
+        }
+      })
       Object.keys(regions).forEach((sido) => {
         Object.keys(regions[sido]).forEach((sigungu) => {
-          if (sigungu.toLowerCase().includes(word.toLowerCase())) {
+          if (sigungu.toLowerCase().includes(wordLower)) {
             results.push({ sido, sigungu })
             regions[sido][sigungu].forEach((dong) => {
               results.push({ sido, sigungu, dong })
             })
           } else {
             regions[sido][sigungu].forEach((dong) => {
-              if (dong.toLowerCase().includes(word.toLowerCase())) {
+              if (dong.toLowerCase().includes(wordLower)) {
                 results.push({ sido, sigungu, dong })
               }
             })
