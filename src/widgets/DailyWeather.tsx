@@ -19,7 +19,6 @@ export default function DailyWeatherCard({ daily }: DailyWeatherCardProps) {
           key={day.date}
           className="flex flex-row items-center gap-2 rounded-xl p-3 bg-gray-50 dark:bg-gray-700/50 border border-transparent min-h-[72px] sm:gap-4 md:rounded-2xl md:p-4 md:flex-1 md:min-h-[80px]"
         >
-          {/* 모바일: 왼쪽 날짜 | 오른쪽 아이콘·날씨·최저최고 */}
           <div className="flex-shrink-0 text-left min-w-0">
             <div className="text-xs font-bold text-gray-900 dark:text-white whitespace-nowrap md:text-sm">
               {(() => {
@@ -66,14 +65,18 @@ export default function DailyWeatherCard({ daily }: DailyWeatherCardProps) {
             </div>
             <div className="flex items-center gap-2 flex-shrink-0 sm:gap-3">
               <div className="text-right">
-                <div className="text-xs font-medium text-gray-500 dark:text-gray-400 md:text-sm">최저</div>
+                <div className="text-xs font-medium text-gray-500 dark:text-gray-400 md:text-sm">
+                  최저
+                </div>
                 <div className="text-base font-bold text-blue-500 dark:text-blue-400 md:text-lg">
                   {Math.round(day.minTemp * 10) / 10}°
                 </div>
               </div>
               <div className="text-gray-300 dark:text-gray-600">/</div>
               <div className="text-right">
-                <div className="text-xs font-medium text-gray-500 dark:text-gray-400 md:text-sm">최고</div>
+                <div className="text-xs font-medium text-gray-500 dark:text-gray-400 md:text-sm">
+                  최고
+                </div>
                 <div className="text-base font-bold text-red-500 dark:text-red-400 md:text-lg">
                   {Math.round(day.maxTemp * 10) / 10}°
                 </div>
