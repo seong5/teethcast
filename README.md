@@ -1,6 +1,7 @@
 # ☀️ Teethcast (리얼티쓰 과제전형)
 
 ### 🚀 배포 : https://teethcast.vercel.app/
+### 📄 상세 내용 : 노션에 정리했습니다. [이동하기](https://www.notion.so/Teethcast-2f5a3d41f82e80759a1fc90d7b235908?source=copy_link)
 
 # ✨ 서비스 소개
 
